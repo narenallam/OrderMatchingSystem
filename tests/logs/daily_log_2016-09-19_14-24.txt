@@ -1,0 +1,70 @@
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: OrderBook created with size : 1000000
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: *** Reader Writer Started ...
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order parsed from csv : 0, Trader_2, Stock_X, Buy, 500, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order receieved! 0, Trader_2, Stock_X, Buy, 500, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order placed. 0, Trader_2, Stock_X, Buy, 500, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order parsed from csv : 1, Trader_3, Stock_X, Buy, 700, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order receieved! 1, Trader_3, Stock_X, Buy, 700, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order placed. 1, Trader_3, Stock_X, Buy, 700, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order parsed from csv : 2, Trader_1, Stock_X, Sell, 1000, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order receieved! 2, Trader_1, Stock_X, Sell, 1000, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order placed. 2, Trader_1, Stock_X, Sell, 1000, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order parsed from csv : 3, Trader_4, Stock_X, Sell, 200, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order receieved! 3, Trader_4, Stock_X, Sell, 200, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Order placed. 3, Trader_4, Stock_X, Sell, 200, Open
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: *** Reader Writer Ended ...
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: ------------------------------------------------------------------
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Trader_2 has come to 'Buy' stock: Stock_X with qty: 500 Order ID: 0
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: No 'Sell'er is available for stock: Stock_X, so adding qty: {0, 500} to 'Buy'er queue.
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: ------------------------------------------------------------------
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Trader_3 has come to 'Buy' stock: Stock_X with qty: 700 Order ID: 1
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: No 'Sell'er is available for stock: Stock_X, so adding qty: {1, 700} to 'Buy'er queue.
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: ------------------------------------------------------------------
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Trader_1 has come to 'Sell' stock: Stock_X with qty: 1000 Order ID: 2
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Tere is no leftOver, in the previous run.
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: ********* Success(!): orderID 0 **********
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: ********* Success(#): orderID 2 **********
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: ------------------------------------------------------------------
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: Trader_4 has come to 'Sell' stock: Stock_X with qty: 200 Order ID: 3
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: There is left Over in the previous run. for orderId: 1, qty:200
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: ********* Success(!!): orderID 1 **********
+[14:24:24:023 +05:30][async_file_logger][info][thread 18365856221335225246]: ********* Success($$): orderID 3 **********
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: OrderBook created with size : 1000000
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: *** Reader Writer Started ...
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order parsed from csv : 0, Trader_2, Stock_X, Sell, 1500, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order receieved! 0, Trader_2, Stock_X, Sell, 1500, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order placed. 0, Trader_2, Stock_X, Sell, 1500, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order parsed from csv : 1, Trader_3, Stock_Y, Buy, 700, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order receieved! 1, Trader_3, Stock_Y, Buy, 700, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order placed. 1, Trader_3, Stock_Y, Buy, 700, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order parsed from csv : 2, Trader_5, Stock_X, Buy, 1000, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order receieved! 2, Trader_5, Stock_X, Buy, 1000, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order placed. 2, Trader_5, Stock_X, Buy, 1000, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order parsed from csv : 3, Trader_1, Stock_Y, Sell, 700, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order receieved! 3, Trader_1, Stock_Y, Sell, 700, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order placed. 3, Trader_1, Stock_Y, Sell, 700, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order parsed from csv : 4, Trader_1, Stock_X, Buy, 500, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order receieved! 4, Trader_1, Stock_X, Buy, 500, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Order placed. 4, Trader_1, Stock_X, Buy, 500, Open
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: *** Reader Writer Ended ...
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: ------------------------------------------------------------------
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Trader_2 has come to 'Sell' stock: Stock_X with qty: 1500 Order ID: 0
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: No 'Buy'er is available for stock: Stock_X, so adding qty: {0, 1500} to 'Sell'er queue.
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: ------------------------------------------------------------------
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Trader_3 has come to 'Buy' stock: Stock_Y with qty: 700 Order ID: 1
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: No 'Sell'er is available for stock: Stock_Y, so adding qty: {1, 700} to 'Buy'er queue.
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: ------------------------------------------------------------------
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Trader_5 has come to 'Buy' stock: Stock_X with qty: 1000 Order ID: 2
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Tere is no leftOver, in the previous run.
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: ********* Success(#): orderID 2 **********
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: ------------------------------------------------------------------
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Trader_1 has come to 'Sell' stock: Stock_Y with qty: 700 Order ID: 3
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Tere is no leftOver, in the previous run.
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: ********* Success(!): orderID 1 **********
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: ********* Success($): orderID 3 **********
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: ------------------------------------------------------------------
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: Trader_1 has come to 'Buy' stock: Stock_X with qty: 500 Order ID: 4
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: There is left Over in the previous run. for orderId: 0, qty:500
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: ********* Success(!!): orderID 0 **********
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: ********* Success($$): orderID 4 **********
+[14:24:24:024 +05:30][async_file_logger][info][thread 18365856221335225246]: OrderBook created with size : 1000000

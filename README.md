@@ -81,19 +81,47 @@
 
 ## How to run the apllication
 
-Prerequisites:
+### Prerequisites:
 
     boost libraries
     python
     platforms : Linux(Ubuntu) or Mac OS X
 
-Process:
+### Process:
 
     > cd OrderMatching
     > make clean && make
     > python DataGenerator.py -sample
     > ./run
 
+### Typical Output for sample a run looks like below:
+####  logfile content:
+    [22:44:56:831 +05:30][async_file_logger][info][thread 14316483420521963862]: *** Reader Writer Started ...
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: **** Matching Process Started *****
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: Matching process waiting for orders ...
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 0, Trader_2, Stock_X, Buy, 500, Open
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 1, Trader_3, Stock_X, Buy, 700, Open
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+    [22:44:56:831 +05:30][async_file_logger][info][thread 14316483420521963862]: *** Reader Writer Ended ...
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 2, Trader_5, Stock_X, Sell, 1000, Success
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 3, Trader_5, Stock_X, Sell, 200, Success
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 4, Trader_1, Stock_Y, Buy, 1000, Open
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 5, Trader_4, Stock_Y, Sell, 1100, Open
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 6, Trader_2, Stock_Y, Buy, 100, Success
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 7, Trader_5, Stock_Z, Sell, 1000, Open
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 8, Trader_2, Stock_Z, Buy, 200, Success
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 9, Trader_4, Stock_Z, Buy, 800, Success
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+    [22:44:56:831 +05:30][async_file_logger][info][thread 17003373142924278091]: **** Mathing Process Ended *****
 ## running tests
 
     > cd OrderMatching/tests
@@ -101,18 +129,18 @@ Process:
     > ./runtests
 
 ## logs
-> logs can be found in .logs folder
+    logs can be found in ./logs folder
 
-# Scope for enhancements:(TBD)
+## Scope for enhancements:(TBD)
 
     Scope for parallelizing:
         A single stock type processing is independent of the other. So,
         we can create more worker threads (if more cores available), and share work among the workers.
 
-# Performance and Benchmarking
+## Performance and Benchmarking
 
     Various performance and load tests are conducted.
-    When there are a million orders on a single stock, that will become the worst case behaviour of the application.
+    When there are a million orders on a single stock, that will be the worst case behaviour of the application.
     The below benchmarks include log processing.
 
     NarenMacBook% python DataGenerator.py 1000000 -flood
@@ -142,9 +170,11 @@ Process:
 ### Order Matching Application is, 
 
 ## 1) 100% functional
+
     aplication is 100% functional, as it is satisfied all the test scenarios.
 
 ## 2) TDD (Test Driven Development)
+
     Development started with Boost::Test unit tests. Completed by making unit tests successfull.
 
     NarenMacBook% ./runtests
@@ -162,7 +192,7 @@ Process:
         * The design depends on which runs faster(Producer or Consumer).
         * In a typical trading system producer is always faster than the consumer
         * if procuder is taking X time and consumer is taking Y time to process, 
-        we create X/Y Producer threads, if those many processors are available.
+          and X > Y, we create X/Y Producer threads, if those many processors are available.
         * 98% apllication logic is designed using lock-free concurrency.
         * Memory pooling is used to reduce the memory allocation costs(boost::lockfree::spsc_queue)
     scalablity: 
@@ -189,4 +219,3 @@ Process:
     used std::unordered_map
     std::vector
     used boost::lockfree::spsc_queue
-

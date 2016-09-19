@@ -32,7 +32,7 @@ OrderMatching::OrderMatching(){
 	clogger = Logger::getLogger(); 
 	elogger = Logger::getAsyncLogger();
 	orderBook.reserve(INIT_ORDER_BOOK_SIZE);
-	elogger->info("OrderBook created with size : {0:d}", INIT_ORDER_BOOK_SIZE);
+	elogger->debug("OrderBook created with size : {}", INIT_ORDER_BOOK_SIZE);
 }
 
 // orders will be entered into orderBook
@@ -40,7 +40,7 @@ OrderMatching::OrderMatching(){
 // input: Order
 // output: book - true on success fully creating a trade in orderBook.
 bool OrderMatching::enterOrder(Order && ord) {
-    elogger->info("Order receieved! {}", ord);
+    elogger->debug("Order receieved! {}", ord);
 
     // orderId is vector index position,
     // we dont need a map for lateral access
@@ -52,7 +52,7 @@ bool OrderMatching::enterOrder(Order && ord) {
 	orderCount.fetch_add(1);
 	orderSyncCond.notify_one();	
 
-    elogger->info("Order placed. {}", ord);
+    elogger->debug("Order placed. {}", ord);
     return true;
 }
 
@@ -77,7 +77,7 @@ bool OrderMatching::readerWriterProcess(void) {
 					string _side{(*loop)[3]};
 					ord.side = ((_side[0] == 'B') ? TradeSide::Buy: TradeSide::Sell);
 					ord.status = OrderStatus::Open;
-					elogger->info("Order parsed from csv : {}", ord);
+					elogger->debug("Order parsed from csv : {}", ord);
 					enterOrder(std::move(ord));
 				}
 				catch(std::invalid_argument& ex) {
@@ -119,8 +119,6 @@ bool OrderMatching::readerWriterProcess(void) {
 	 try {
 		elogger->info("**** Matching Process Started *****");
 		// pending orders
-
-
 		while (true) {
 			// There is scope for parallelizing the matching proces.
 			// if multiple processors exists, We can create multi-ple macthers,
@@ -148,12 +146,9 @@ bool OrderMatching::readerWriterProcess(void) {
 			// data exausted
 			if(dataExausted.test_and_set()) break;
 		}
-
-
 		elogger->info("------------------------------------------------------------------");
 		elogger->info("**** Mathing Process Ended *****");
 		return false;
-
 	 }
 	catch(const exception& ex) {
 		ExceptionRecord e;

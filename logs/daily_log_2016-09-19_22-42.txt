@@ -1,0 +1,57 @@
+[22:42:01:445 +05:30][async_file_logger][info][thread 11806043562274766039]: OrderBook created with size : 1000000
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: *** Reader Writer Started ...
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: **** Matching Process Started *****
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: Matching process waiting for orders ...
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order parsed from csv : 0, Trader_2, Stock_X, Buy, 500, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order receieved! 0, Trader_2, Stock_X, Buy, 500, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order placed. 0, Trader_2, Stock_X, Buy, 500, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order parsed from csv : 1, Trader_3, Stock_X, Buy, 700, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order receieved! 1, Trader_3, Stock_X, Buy, 700, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order placed. 1, Trader_3, Stock_X, Buy, 700, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order parsed from csv : 2, Trader_5, Stock_X, Sell, 1000, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order receieved! 2, Trader_5, Stock_X, Sell, 1000, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order placed. 2, Trader_5, Stock_X, Sell, 1000, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order parsed from csv : 3, Trader_5, Stock_X, Sell, 200, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order receieved! 3, Trader_5, Stock_X, Sell, 200, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order placed. 3, Trader_5, Stock_X, Sell, 200, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order parsed from csv : 4, Trader_1, Stock_Y, Buy, 1000, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order receieved! 4, Trader_1, Stock_Y, Buy, 1000, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order placed. 4, Trader_1, Stock_Y, Buy, 1000, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order parsed from csv : 5, Trader_4, Stock_Y, Sell, 1100, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order receieved! 5, Trader_4, Stock_Y, Sell, 1100, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order placed. 5, Trader_4, Stock_Y, Sell, 1100, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order parsed from csv : 6, Trader_2, Stock_Y, Buy, 100, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order receieved! 6, Trader_2, Stock_Y, Buy, 100, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order placed. 6, Trader_2, Stock_Y, Buy, 100, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order parsed from csv : 7, Trader_5, Stock_Z, Sell, 1000, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order receieved! 7, Trader_5, Stock_Z, Sell, 1000, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order placed. 7, Trader_5, Stock_Z, Sell, 1000, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order parsed from csv : 8, Trader_2, Stock_Z, Buy, 200, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 0, Trader_2, Stock_X, Buy, 500, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order receieved! 8, Trader_2, Stock_Z, Buy, 200, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order placed. 8, Trader_2, Stock_Z, Buy, 200, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 1, Trader_3, Stock_X, Buy, 700, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 2, Trader_5, Stock_X, Sell, 1000, Success
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order parsed from csv : 9, Trader_4, Stock_Z, Buy, 800, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order receieved! 9, Trader_4, Stock_Z, Buy, 800, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 3, Trader_5, Stock_X, Sell, 200, Success
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: Order placed. 9, Trader_4, Stock_Z, Buy, 800, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 4, Trader_1, Stock_Y, Buy, 1000, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 5, Trader_4, Stock_Y, Sell, 1100, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 6, Trader_2, Stock_Y, Buy, 100, Success
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+[22:42:01:445 +05:30][async_file_logger][info][thread 14316483420521963862]: *** Reader Writer Ended ...
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 7, Trader_5, Stock_Z, Sell, 1000, Open
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 8, Trader_2, Stock_Z, Buy, 200, Success
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 9, Trader_4, Stock_Z, Buy, 800, Success
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: ------------------------------------------------------------------
+[22:42:01:445 +05:30][async_file_logger][info][thread 17003373142924278091]: **** Mathing Process Ended *****

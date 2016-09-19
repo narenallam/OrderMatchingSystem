@@ -26,10 +26,18 @@
 
 * Development started with below use cases:
 
-    Few use cases: 
-        1) Trader A places a buy order of 200 on stock S, the order is stored in the order store as open. Trader B places a sell order of 200 on stock S. Notify both the traders with success message.
-        2) Trader C places a sell order of 300 on stock G. Trader D places a buy order of 200 on stock G. Notify the Trader D with success message. Trader E places a Buy Order of 200 on stock G. Notify the Trader C with success message.
-        3) Trader W, X and Y place sell order of 200 on stock H each. Trade Z place a buy order of 600 on stock H. Trader W, X, Y and Z should be notified of success.
+#### Use cases:
+
+        1) Trader A places a buy order of 200 on stock S, the order is stored in the order store as open. 
+        Trader B places a sell order of 200 on stock S. Notify both the traders with success message.
+
+        2) Trader C places a sell order of 300 on stock G. 
+        Trader D places a buy order of 200 on stock G. Notify the Trader D with success message. 
+        Trader E places a Buy Order of 200 on stock G. Notify the Trader C with success message.
+
+        3) Trader W, X and Y place sell order of 200 on stock H each. 
+        Trade Z place a buy order of 600 on stock H. 
+        Trader W, X, Y and Z should be notified of success.
 
 * I converted these use cases to unittests(refer ./tests folder), later did a lot of refactoring to achieve the results.
 * used asynchronous lock-free logger for the reduction of latencies and for the real-time instrumentation.

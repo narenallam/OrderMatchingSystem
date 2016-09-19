@@ -179,7 +179,7 @@ Process:
         OrderMatching.cpp is the main source file which contains definitions for all of the above functionalities.
     
 ## 6) Near real-time : Latency/Performance (What is the latency of your application, if 1 million Buy and Sell orders on multiple stocks are placed?)
-    This includes logging -
+    This includes logging - running on single core
 
         Time taken to process 1000000 orders : 4.25691 secs [random stocks]
         Time taken to process 1000001 orders : 4.20522 secs [single stock]

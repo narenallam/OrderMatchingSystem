@@ -85,16 +85,16 @@ Prerequisites:
 
 Process:
 
-> cd OrderMatching
-> make clean && make
-> python DataGenerator.py -sample
-> ./run
+    > cd OrderMatching
+    > make clean && make
+    > python DataGenerator.py -sample
+    > ./run
 
 # running tests
 
-> cd OrderMatching/tests
-> make clean && make
-> ./runtests
+    > cd OrderMatching/tests
+    > make clean && make
+    > ./runtests
 
 # logs
 > logs can be found in .logs folder
@@ -103,27 +103,27 @@ Process:
 Various performance and load tests are conducted.
 When there are a million orders on a single stock, that will become the worst case behaviour of the application.
 
-NarenMacBook% python DataGenerator.py 1000000 -flood
-Success: orders.csv generated! with 1000000 single stock records.
-NarenMacBook% ./run
-[13:18:46:738 +05:30][console][info][thread 18365856221335225246]: Trading System started ...
-[13:18:46:740 +05:30][console][info][thread 18365856221335225246]: data reader thread(Producer) started ...
-[13:18:46:740 +05:30][console][info][thread 18365856221335225246]: matchingEngine thread(Consumer) started ...
-[13:18:51:945 +05:30][console][info][thread 18365856221335225246]: readerWriter thread joined ...
-[13:18:51:945 +05:30][console][info][thread 18365856221335225246]: matchingEngine thread joined ...
-[13:18:51:945 +05:30][console][info][thread 18365856221335225246]: Time taken to process 1000001 orders : 5.20522 secs
-[13:18:51:945 +05:30][console][info][thread 18365856221335225246]: trading System Ended.
-NarenMacBook% python DataGenerator.py 1000000
-Success: orders.csv generated! with 1000000 random records.
-NarenMacBook% ./run
-[13:19:33:817 +05:30][console][info][thread 18365856221335225246]: Trading System started ...
-[13:19:33:818 +05:30][console][info][thread 18365856221335225246]: data reader thread(Producer) started ...
-[13:19:33:818 +05:30][console][info][thread 18365856221335225246]: matchingEngine thread(Consumer) started ...
-[13:19:39:075 +05:30][console][info][thread 18365856221335225246]: readerWriter thread joined ...
-[13:19:39:075 +05:30][console][info][thread 18365856221335225246]: matchingEngine thread joined ...
-[13:19:39:075 +05:30][console][info][thread 18365856221335225246]: Time taken to process 1000000 orders : 5.25691 secs
-[13:19:39:075 +05:30][console][info][thread 18365856221335225246]: trading System Ended.
-NarenMacBook%
+    NarenMacBook% python DataGenerator.py 1000000 -flood
+    Success: orders.csv generated! with 1000000 single stock records.
+    NarenMacBook% ./run
+    [13:18:46:738 +05:30][console][info][thread 18365856221335225246]: Trading System started ...
+    [13:18:46:740 +05:30][console][info][thread 18365856221335225246]: data reader thread(Producer) started ...
+    [13:18:46:740 +05:30][console][info][thread 18365856221335225246]: matchingEngine thread(Consumer) started ...
+    [13:18:51:945 +05:30][console][info][thread 18365856221335225246]: readerWriter thread joined ...
+    [13:18:51:945 +05:30][console][info][thread 18365856221335225246]: matchingEngine thread joined ...
+    [13:18:51:945 +05:30][console][info][thread 18365856221335225246]: Time taken to process 1000001 orders : 5.20522 secs
+    [13:18:51:945 +05:30][console][info][thread 18365856221335225246]: trading System Ended.
+    NarenMacBook% python DataGenerator.py 1000000
+    Success: orders.csv generated! with 1000000 random records.
+    NarenMacBook% ./run
+    [13:19:33:817 +05:30][console][info][thread 18365856221335225246]: Trading System started ...
+    [13:19:33:818 +05:30][console][info][thread 18365856221335225246]: data reader thread(Producer) started ...
+    [13:19:33:818 +05:30][console][info][thread 18365856221335225246]: matchingEngine thread(Consumer) started ...
+    [13:19:39:075 +05:30][console][info][thread 18365856221335225246]: readerWriter thread joined ...
+    [13:19:39:075 +05:30][console][info][thread 18365856221335225246]: matchingEngine thread joined ...
+    [13:19:39:075 +05:30][console][info][thread 18365856221335225246]: Time taken to process 1000000 orders : 5.25691 secs
+    [13:19:39:075 +05:30][console][info][thread 18365856221335225246]: trading System Ended.
+    NarenMacBook%
 
 # Conclusion
 Order Matching Application is 
@@ -150,9 +150,10 @@ Order Matching Application is
 4. Managing concurrency (Multithreading)
 
 > used lock-free/ lock-based primitives to manage concurrency
+
 5. Latency/Performance (What is the latency of your application, if 1 million Buy and Sell orders on multiple stocks are placed?)
-[13:19:39:075 +05:30][console][info][thread 18365856221335225246]: Time taken to process 1000000 orders : 5.25691 secs
-[13:18:51:945 +05:30][console][info][thread 18365856221335225246]: Time taken to process 1000001 orders : 5.20522 secs
+    Time taken to process 1000000 orders : 5.25691 secs [random stocks]
+    Time taken to process 1000001 orders : 5.20522 secs [single stock]
 
 6. Usage of Data structures.
 > used std::unordered_map, std::vector

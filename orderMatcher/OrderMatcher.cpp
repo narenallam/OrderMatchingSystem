@@ -132,8 +132,14 @@ bool OrderMatching::readerWriterProcess(void) {
 
 			while(nextOrder < orderCount) {
 				elogger->info("------------------------------------------------------------------");
-				elogger->info("Processing {}", orderBook[nextOrder]);
+				// elogger->info("Processing {}", orderBook[nextOrder]);
 				bool status = matcher(orderBook[nextOrder]);
+				if (status) {
+					elogger->info("Success : order {}", orderBook[nextOrder]);
+				}
+				else {
+					elogger->info("Not Success : order {}", orderBook[nextOrder]);
+				}
 				nextOrder.fetch_add(1);
 			}
 			// notifying boss that, I'm done.
@@ -168,45 +174,43 @@ bool OrderMatching::readerWriterProcess(void) {
 bool OrderMatching::matcher(Order& ord) {
 	// Buyer goes to Seller
 	// Seller goes to Buyer
-	elogger->info("------------------------------------------------------------------");
-	elogger->info("{} has come to {} stock: {} with qty: {} Order ID: {}", ord.trader, 
-	((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"), ord.stock, ord.quantity, ord.orderId);
+	// elogger->info("------------------------------------------------------------------");
+	// elogger->info("{} has come to {} stock: {} with qty: {} Order ID: {}", ord.trader, 
+	// ((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"), ord.stock, ord.quantity, ord.orderId);
 	auto& cs_que = ((ord.side == TradeSide::Buy) ? sellMap[ord.stock] : buyMap[ord.stock]);
 
 	long qty = ord.quantity;
 	if (not cs_que.stockQueue.empty() or cs_que.isLeftOver) {		
 		if (cs_que.isLeftOver) {
 			qty = qty - cs_que.leftOver.quantity;
-			elogger->info("There is left Over in the previous run. for orderId: {}, qty:{}",
-			cs_que.leftOver.orderId, cs_que.leftOver.quantity);
+			// elogger->info("There is left Over in the previous run. for orderId: {}, qty:{}");
+			// cs_que.leftOver.orderId, cs_que.leftOver.quantity);
 
 			if (qty >= 0) {
 				orderBook[cs_que.leftOver.orderId].status = OrderStatus::Success;
-				elogger->info("********* Success(!!): orderID {} **********", cs_que.leftOver.orderId);
-				//elogger->info("Success: {}", orderBook[cs_que.leftOver.orderId]);
+				// elogger->info("********* Success(!!): orderID {} **********", cs_que.leftOver.orderId);
+				
 				cs_que.isLeftOver = false;
 
 				if (qty == 0) {
 					orderBook[ord.orderId].status = OrderStatus::Success;
-					elogger->info("********* Success($$): orderID {} **********", ord.orderId);
-					//elogger->info("Success: {}", orderBook[ord.orderId]);
+					// elogger->info("********* Success($$): orderID {} **********", ord.orderId);
+					
 					return true;
 				} 
 			}
 			else {
 				orderBook[ord.orderId].status = OrderStatus::Success;
-				elogger->info("********* Success(##): orderID {} **********", ord.orderId);
-				//elogger->info("Success: {}", orderBook[ord.orderId]);
-			
+				// elogger->info("********* Success(##): orderID {} **********", ord.orderId);
 				cs_que.leftOver.quantity = qty * (-1); // making it +ve, i.e, abs()
 				cs_que.isLeftOver = true;
-				elogger->info("Left Over: {}", cs_que.leftOver);
+				// elogger->info("Left Over: {}", cs_que.leftOver);
 				// orderId remains same
 				return true;
 			}
 		} 
 		else { 
-			elogger->info("Tere is no leftOver, in the previous run.");
+			// elogger->info("Tere is no leftOver, in the previous run.");
 			QuantityTrader stock_in_que;
 			while(qty > 0) {
 				if(cs_que.stockQueue.pop(stock_in_que)){
@@ -214,21 +218,18 @@ bool OrderMatching::matcher(Order& ord) {
 					qty = qty - stock_in_que.quantity;
 					if (qty >= 0) {
 						orderBook[stock_in_que.orderId].status = OrderStatus::Success;
-						elogger->info("********* Success(!): orderID {} **********", stock_in_que.orderId);
-						//elogger->info("Success: {}", orderBook[stock_in_que.orderId]);
+						// elogger->info("********* Success(!): orderID {} **********", stock_in_que.orderId);
+						
 						cs_que.isLeftOver = false;
 						if (qty == 0) {
 							orderBook[ord.orderId].status = OrderStatus::Success;
-							elogger->info("********* Success($): orderID {} **********", ord.orderId);
-							//elogger->info("Success: {}", orderBook[ord.orderId]);
+							// elogger->info("********* Success($): orderID {} **********", ord.orderId);
 							return true;
 						} 
 					}
 					else {
 						orderBook[ord.orderId].status = OrderStatus::Success;
-						elogger->info("********* Success(#): orderID {} **********", ord.orderId);
-						//elogger->info("Success: {}", orderBook[ord.orderId]);
-
+						// elogger->info("********* Success(#): orderID {} **********", ord.orderId);
 						cs_que.leftOver.quantity = qty * (-1); // making it +ve, i.e, abs()
 						cs_que.leftOver.orderId = stock_in_que.orderId;
 						cs_que.isLeftOver = true;
@@ -241,10 +242,10 @@ bool OrderMatching::matcher(Order& ord) {
 					// order quantity still remains, store it in map
 					QuantityTrader qt(qty, ord.orderId);
 					_que.stockQueue.push(qt);
-					elogger->info("Stock que empty, on {} side for stock {} for {}er, adding qty:{} to {}er queue orderID {}", 
-					((ord.side == TradeSide::Sell) ? "\'Buy\'" : "\'Sell\'"), ord.stock,
-					 ((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"), qty,
-					((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"), ord.orderId);
+					// elogger->info("Stock que empty, on {} side for stock {} for {}er, adding qty:{} to {}er queue orderID {}", 
+					// ((ord.side == TradeSide::Sell) ? "\'Buy\'" : "\'Sell\'"), ord.stock,
+					// ((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"), qty,
+					// ((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"), ord.orderId);
 					return false;
 				}
 			}
@@ -256,9 +257,9 @@ bool OrderMatching::matcher(Order& ord) {
 		auto& _que = ((ord.side == TradeSide::Buy) ? buyMap[ord.stock] : sellMap[ord.stock]);
 					  
 		_que.stockQueue.push(qt);
-		elogger->info("No {}er is available for stock: {}, so adding qty: {} to {}er queue.", 
-		((ord.side == TradeSide::Sell) ? "\'Buy\'" : "\'Sell\'"), ord.stock, qt,
-		((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"));
+		// elogger->info("No {}er is available for stock: {}, so adding qty: {} to {}er queue.", 
+		// ((ord.side == TradeSide::Sell) ? "\'Buy\'" : "\'Sell\'"), ord.stock, qt,
+		// ((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"));
 	}	
 	return false;
 }

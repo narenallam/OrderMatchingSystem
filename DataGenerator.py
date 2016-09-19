@@ -87,7 +87,7 @@ def main():
             for i in range(record_count):
                 f.write(sample(['Trader_'+str(i+1) for i in range(TRADER_TYPE_COUNT+1)], 1)[0]+','+sample(STOCKS, 1)[0]+','+
                 sample([str(x) for x in range(100, MAX_QAUNTITY+1, 100)],1)[0]+','+sample(['Buy', 'Sell'], 1)[0]+'\n')
-                print("Success: orders.csv generated! with %s random records."%record_count)
+            print("Success: orders.csv generated! with %s random records."%record_count)
         else:
             for i in range(record_count):
                 f.write(sample(['Trader_'+chr(65+i) for i in range(26)], 1)[0]+ ','+'Stock_X'+','+ '1'+','+'Buy'+'\n')

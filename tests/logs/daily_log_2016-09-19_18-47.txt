@@ -1,0 +1,34 @@
+[18:47:08:381 +05:30][async_file_logger][info][thread 4482316151914544288]: OrderBook created with size : 1000000
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: *** Reader Writer Started ...
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order parsed from csv : 0, Trader_2, Stock_X, Buy, 500, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order receieved! 0, Trader_2, Stock_X, Buy, 500, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order placed. 0, Trader_2, Stock_X, Buy, 500, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order parsed from csv : 1, Trader_3, Stock_X, Buy, 700, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order receieved! 1, Trader_3, Stock_X, Buy, 700, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order placed. 1, Trader_3, Stock_X, Buy, 700, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order parsed from csv : 2, Trader_1, Stock_X, Sell, 1000, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order receieved! 2, Trader_1, Stock_X, Sell, 1000, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order placed. 2, Trader_1, Stock_X, Sell, 1000, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order parsed from csv : 3, Trader_4, Stock_X, Sell, 200, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order receieved! 3, Trader_4, Stock_X, Sell, 200, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order placed. 3, Trader_4, Stock_X, Sell, 200, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: *** Reader Writer Ended ...
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: OrderBook created with size : 1000000
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: *** Reader Writer Started ...
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order parsed from csv : 0, Trader_2, Stock_X, Sell, 1500, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order receieved! 0, Trader_2, Stock_X, Sell, 1500, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order placed. 0, Trader_2, Stock_X, Sell, 1500, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order parsed from csv : 1, Trader_3, Stock_Y, Buy, 700, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order receieved! 1, Trader_3, Stock_Y, Buy, 700, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order placed. 1, Trader_3, Stock_Y, Buy, 700, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order parsed from csv : 2, Trader_5, Stock_X, Buy, 1000, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order receieved! 2, Trader_5, Stock_X, Buy, 1000, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order placed. 2, Trader_5, Stock_X, Buy, 1000, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order parsed from csv : 3, Trader_1, Stock_Y, Sell, 700, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order receieved! 3, Trader_1, Stock_Y, Sell, 700, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order placed. 3, Trader_1, Stock_Y, Sell, 700, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order parsed from csv : 4, Trader_1, Stock_X, Buy, 500, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order receieved! 4, Trader_1, Stock_X, Buy, 500, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: Order placed. 4, Trader_1, Stock_X, Buy, 500, Open
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: *** Reader Writer Ended ...
+[18:47:08:382 +05:30][async_file_logger][info][thread 4482316151914544288]: OrderBook created with size : 1000000

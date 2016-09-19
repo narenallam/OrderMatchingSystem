@@ -24,7 +24,7 @@
 
 ## About the Order Matching application
 
-* Development started with below use cases,
+* Development started with below use cases:
 
     Few use cases: 
         1) Trader A places a buy order of 200 on stock S, the order is stored in the order store as open. Trader B places a sell order of 200 on stock S. Notify both the traders with success message.

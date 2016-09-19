@@ -139,7 +139,7 @@ Process:
 
 # Conclusion
 
-    Order Matching Application is, 
+### Order Matching Application is, 
 
 ## 1) 100% functional
     aplication is 100% functional, as it is satisfied all the test scenarios.
@@ -168,7 +168,6 @@ Process:
     scalablity: 
         as we did lock-free appraoch application is highly-scalable
 
-
 ## 5) Multithreaded : Managing concurrency (Multithreading)
 
     Designed in multi-threaded way.
@@ -179,14 +178,13 @@ Process:
 
         OrderMatching.cpp is the main source file which contains definitions for all of the above functionalities.
     
-
-## Latency/Performance (What is the latency of your application, if 1 million Buy and Sell orders on multiple stocks are placed?)
+## 6) Near real-time : Latency/Performance (What is the latency of your application, if 1 million Buy and Sell orders on multiple stocks are placed?)
     This includes logging -
 
         Time taken to process 1000000 orders : 4.25691 secs [random stocks]
         Time taken to process 1000001 orders : 4.20522 secs [single stock]
 
-## Usage of Data structures.
+## 7) Well Constructed and Performant : Usage of Data structures.
 
     used std::unordered_map
     std::vector

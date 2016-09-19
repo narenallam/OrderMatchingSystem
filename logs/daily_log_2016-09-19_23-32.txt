@@ -1,0 +1,25 @@
+[23:32:20:082 +05:30][async_file_logger][info][thread 14316483420521963862]: *** Reader Writer Started ...
+[23:32:20:082 +05:30][async_file_logger][info][thread 17003373142924278091]: **** Matching Process Started *****
+[23:32:20:082 +05:30][async_file_logger][info][thread 17003373142924278091]: Matching process waiting for orders ...
+[23:32:20:083 +05:30][async_file_logger][info][thread 14316483420521963862]: *** Reader Writer Ended ...
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 0, Trader_2, Stock_X, Buy, 500, Open
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 1, Trader_3, Stock_X, Buy, 700, Open
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success(!): orderID 0 
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success(#): orderID 2 
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 2, Trader_5, Stock_X, Sell, 1000, Success
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success(!!): orderID 1 
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success($$): orderID 3 
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 3, Trader_5, Stock_X, Sell, 200, Success
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 4, Trader_1, Stock_Y, Buy, 1000, Open
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success(!): orderID 4 
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 5, Trader_4, Stock_Y, Sell, 1100, Open
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success(!): orderID 5 
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success($): orderID 6 
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 6, Trader_2, Stock_Y, Buy, 100, Success
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Not Success : order 7, Trader_5, Stock_Z, Sell, 1000, Open
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success(#): orderID 8 
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 8, Trader_2, Stock_Z, Buy, 200, Success
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success(!!): orderID 7 
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success($$): orderID 9 
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 9, Trader_4, Stock_Z, Buy, 800, Success
+[23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: **** Mathing Process Ended *****

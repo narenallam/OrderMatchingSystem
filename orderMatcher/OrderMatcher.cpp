@@ -129,7 +129,6 @@ bool OrderMatching::readerWriterProcess(void) {
 			orderSyncCond.wait(lk, [](){return nextOrder < orderCount;});
 
 			while(nextOrder < orderCount) {
-				elogger->info("------------------------------------------------------------------");
 				// elogger->info("Processing {}", orderBook[nextOrder]);
 				bool status = matcher(orderBook[nextOrder]);
 				if (status) {
@@ -146,7 +145,6 @@ bool OrderMatching::readerWriterProcess(void) {
 			// data exausted
 			if(dataExausted.test_and_set()) break;
 		}
-		elogger->info("------------------------------------------------------------------");
 		elogger->info("**** Mathing Process Ended *****");
 		return false;
 	 }
@@ -183,20 +181,19 @@ bool OrderMatching::matcher(Order& ord) {
 
 			if (qty >= 0) {
 				orderBook[cs_que.leftOver.orderId].status = OrderStatus::Success;
-				// elogger->info("********* Success(!!): orderID {} **********", cs_que.leftOver.orderId);
+				elogger->info("Success(!!): orderID {} ", cs_que.leftOver.orderId);
 				
 				cs_que.isLeftOver = false;
 
 				if (qty == 0) {
 					orderBook[ord.orderId].status = OrderStatus::Success;
-					// elogger->info("********* Success($$): orderID {} **********", ord.orderId);
-					
+					elogger->info("Success($$): orderID {} ", ord.orderId);
 					return true;
 				} 
 			}
 			else {
 				orderBook[ord.orderId].status = OrderStatus::Success;
-				// elogger->info("********* Success(##): orderID {} **********", ord.orderId);
+				elogger->info("Success(##): orderID {} ", ord.orderId);
 				cs_que.leftOver.quantity = qty * (-1); // making it +ve, i.e, abs()
 				cs_que.isLeftOver = true;
 				// elogger->info("Left Over: {}", cs_que.leftOver);
@@ -213,18 +210,18 @@ bool OrderMatching::matcher(Order& ord) {
 					qty = qty - stock_in_que.quantity;
 					if (qty >= 0) {
 						orderBook[stock_in_que.orderId].status = OrderStatus::Success;
-						// elogger->info("********* Success(!): orderID {} **********", stock_in_que.orderId);
+						elogger->info("Success(!): orderID {} ", stock_in_que.orderId);
 						
 						cs_que.isLeftOver = false;
 						if (qty == 0) {
 							orderBook[ord.orderId].status = OrderStatus::Success;
-							// elogger->info("********* Success($): orderID {} **********", ord.orderId);
+							elogger->info("Success($): orderID {} ", ord.orderId);
 							return true;
 						} 
 					}
 					else {
 						orderBook[ord.orderId].status = OrderStatus::Success;
-						// elogger->info("********* Success(#): orderID {} **********", ord.orderId);
+						elogger->info("Success(#): orderID {} ", ord.orderId);
 						cs_que.leftOver.quantity = qty * (-1); // making it +ve, i.e, abs()
 						cs_que.leftOver.orderId = stock_in_que.orderId;
 						cs_que.isLeftOver = true;
@@ -250,7 +247,6 @@ bool OrderMatching::matcher(Order& ord) {
 		// if stock is first time arrived into trading, create an entry for it
 		QuantityTrader qt(ord.quantity, ord.orderId);
 		auto& _que = ((ord.side == TradeSide::Buy) ? buyMap[ord.stock] : sellMap[ord.stock]);
-					  
 		_que.stockQueue.push(qt);
 		// elogger->info("No {}er is available for stock: {}, so adding qty: {} to {}er queue.", 
 		// ((ord.side == TradeSide::Sell) ? "\'Buy\'" : "\'Sell\'"), ord.stock, qt,

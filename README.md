@@ -154,13 +154,13 @@
     [23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: Success : order 9, Trader_4, Stock_Z, Buy, 800, Success
     [23:32:20:083 +05:30][async_file_logger][info][thread 17003373142924278091]: **** Mathing Process Ended *****
 
-## running tests
+## Running tests
 
     > cd OrderMatching/tests
     > make clean && make
     > ./runtests
 
-## logs
+## Logs
     logs can be found in ./logs folder
 
 ## Scope for enhancements:(TBD)
@@ -230,7 +230,8 @@
 
         OrderMatching.cpp is the main source file which contains definitions for all of the above functionalities.
     
-## 6) Near real-time : Latency/Performance (What is the latency of your application, if 1 million Buy and Sell orders on multiple stocks are placed?)
+## 6) Latency/Performance (What is the latency of your application, if 1 million Buy and Sell orders on multiple stocks are placed?)
+#### Near real-time :
     This includes logging - running on single core
 
         Time taken to process 1000000 orders : 4.25691 secs [random stocks]

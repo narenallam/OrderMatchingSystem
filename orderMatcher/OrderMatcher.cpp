@@ -109,10 +109,15 @@ bool OrderMatching::readerWriterProcess(void) {
 					allExceptions.push_back(e);
 					success = false;
 				}
+				if (nextOrder > orderCount) orderSyncCond.notify_one();
 			}
 		}
 		catch (std::ios_base::failure &ex) {
 			elogger->error("Can not open file orders.csv {}", ex.what());
+			e.ex_ptr = std::current_exception();
+			e.thread_name = "ReaderWriter Thread";
+			std::lock_guard<std::mutex> gaurd(exceptMutex);
+			allExceptions.push_back(e);
 			success = false;
 		}
 		elogger->info("*** Reader Writer Ended ...");

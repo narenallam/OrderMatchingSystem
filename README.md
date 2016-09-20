@@ -42,6 +42,20 @@
 * I converted these use cases to unittests(refer ./tests folder), later did a lot of refactoring to achieve the results.
 * used asynchronous lock-free logger for the reduction of latencies and for the real-time instrumentation.
 
+    ## Design and Approach
+
+    There are two maps one for sell and one for buy.
+    each map contains {stock: orderqueue}
+    Treading model:
+        * Used Producer - Consumer and Boss-Worker threading models
+        * The design depends on which runs faster(Producer or Consumer).
+        * In a typical trading system producer is always faster than the consumer
+        * if procuder is taking X time and consumer is taking Y time to process, 
+          and X > Y, we create X/Y Producer threads, if those many processors are available.
+        * 98% apllication logic is designed using lock-free concurrency.
+        * Memory pooling is used to reduce the memory allocation costs(boost::lockfree::spsc_queue)
+    scalablity: 
+        as we did lock-free appraoch application is highly-scalable
 ## Used concepts
 
     Multithreading : 
@@ -193,19 +207,9 @@
 
     *** No errors detected
 
-## 3) Well designed : Approach and Design
-
-    Treading model:
-        * Used Producer - Consumer and Boss-Worker threading models
-        * The design depends on which runs faster(Producer or Consumer).
-        * In a typical trading system producer is always faster than the consumer
-        * if procuder is taking X time and consumer is taking Y time to process, 
-          and X > Y, we create X/Y Producer threads, if those many processors are available.
-        * 98% apllication logic is designed using lock-free concurrency.
-        * Memory pooling is used to reduce the memory allocation costs(boost::lockfree::spsc_queue)
-    scalablity: 
-        as we did lock-free appraoch application is highly-scalable
-
+## 3) Well designed : 
+     Refer Approach and Design
+   
 ## 5) Multithreaded : Managing concurrency (Multithreading)
 
     Designed in multi-threaded way.

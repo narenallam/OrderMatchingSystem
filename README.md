@@ -126,7 +126,18 @@
     > python DataGenerator.py -sample
     > ./run
 
-### Typical Output for sample a run looks like below:
+### Typical Output for a sample run looks like below:
+####  Orders.csv
+    Trader_2,Stock_X,500,Buy
+    Trader_3,Stock_X,700,Buy
+    Trader_5,Stock_X,1000,Sell
+    Trader_5,Stock_X,200,Sell
+    Trader_1,Stock_Y,1000,Buy
+    Trader_4,Stock_Y,1100,Sell
+    Trader_2,Stock_Y,100,Buy
+    Trader_5,Stock_Z,1000,Sell
+    Trader_2,Stock_Z,200,Buy
+    Trader_4,Stock_Z,800,Buy
 ####  logfile content:
     [23:32:20:082 +05:30][async_file_logger][info][thread 14316483420521963862]: *** Reader Writer Started ...
     [23:32:20:082 +05:30][async_file_logger][info][thread 17003373142924278091]: **** Matching Process Started *****

@@ -229,13 +229,16 @@
         3. readerWriterProcess - Worker(Prodcuer) thread, this thread provides data feed for matchingProcess.
 
         OrderMatching.cpp is the main source file which contains definitions for all of the above functionalities.
-    
-## 6) Latency/Performance (What is the latency of your application, if 1 million Buy and Sell orders on multiple stocks are placed?)
+## 6) Latency/Performance (What is the latency of your application, if 1 million Buy and Sell orders on multiple stocks are placed?) 
 #### Near real-time :
-    This includes logging - running on single core
-
+        This includes logging - running on single core
+        MAX
         Time taken to process 1000000 orders : 4.25691 secs [random stocks]
         Time taken to process 1000001 orders : 4.20522 secs [single stock]
+
+        MIN
+        Time taken to process 1000000 orders : 0.939233 secs [random stocks]
+        Time taken to process 1000001 orders : 0.679049 secs [single stock]
 
 ## 7) Well Constructed and Performant : Usage of Data structures.
 

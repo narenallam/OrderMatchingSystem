@@ -1,5 +1,6 @@
 # Order Matching system
 ## Problem statement:
+
     Order Book: Write a minimalistic working application of custom order book using C++ and its standard libraries. This application will contain an order store and a matching engine. The order store is meant to record only the open orders (unmatched orders). The matching engine will match the orders based on the interest of buyers and sellers. Assume that the price is not consider. When an order is placed, the matching engine will match the order against the order(s) in the order store and notify the trader if matched.
 
     Order will contain Trader, stock, quantity, Side (Buy or Sell).
@@ -42,10 +43,19 @@
 * I converted these use cases to unittests(refer ./tests folder), later did a lot of refactoring to achieve the results.
 * used asynchronous lock-free logger for the reduction of latencies and for the real-time instrumentation.
 
-    ## Design and Approach
+## Design and Approach
 
-    There are two maps one for sell and one for buy.
-    each map contains {stock: orderqueue}
+    There are two unordered_maps one for sell and one for buy.
+    Each map contains {stock: orderqueue} associations.
+    orderqueue is self-managed, memory-pooled and lock-free container.
+    When a new buy order arrives, matcher deducts all sell orders from the  orderqueue, 
+    and updates the status to 'Success'
+    When a new sell order arrives, matcher deducts all buy orders from the  orderqueue,
+    and updates the status to 'Success'.
+
+        Note: Even we have two order quques, one queue will always be empty(either buy or sell).
+              Application is single threaded.
+    
     Treading model:
         * Used Producer - Consumer and Boss-Worker threading models
         * The design depends on which runs faster(Producer or Consumer).
@@ -55,7 +65,7 @@
         * 98% apllication logic is designed using lock-free concurrency.
         * Memory pooling is used to reduce the memory allocation costs(boost::lockfree::spsc_queue)
     scalablity: 
-        as we did lock-free approach application is highly-scalable
+        As, the data structures are lock-free, and  application is highly-scalable
 ## Used concepts
 
     Multithreading : 

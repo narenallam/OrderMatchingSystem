@@ -109,7 +109,7 @@ bool OrderMatching::readerWriterProcess(void) {
 					allExceptions.push_back(e);
 					success = false;
 				}
-				if (nextOrder > orderCount) orderSyncCond.notify_one();
+				if (nextOrder < orderCount) orderSyncCond.notify_one();
 			}
 		}
 		catch (std::ios_base::failure &ex) {

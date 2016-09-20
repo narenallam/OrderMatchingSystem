@@ -60,6 +60,8 @@ bool OrderMatching::enterOrder(Order && ord) {
 // reads from csv, writes to orderBook vector
 // signals matchingEngine, if sleeps.
 bool OrderMatching::readerWriterProcess(void) {
+	ExceptionRecord e;
+	bool success = true;
 	try {
 		elogger->info("*** Reader Writer Started ...");
 		try{
@@ -83,52 +85,70 @@ bool OrderMatching::readerWriterProcess(void) {
 				catch(std::invalid_argument& ex) {
 					elogger->error("Cannot convert from iterator : {}, {}, {}, {}, Exception : {}", 
 					(*loop)[0], (*loop)[1], (*loop)[2], (*loop)[3], ex.what());
+					e.ex_ptr = std::current_exception();
+					e.thread_name = "ReaderWriter Thread";
+					std::lock_guard<std::mutex> gaurd(exceptMutex);
+					allExceptions.push_back(e);
+					success = false;
 				}
 				catch(std::out_of_range& ex) {
 					elogger->error("Out of range while order object creation : {}, {}, {}, {}, Exception : {}", 
 					(*loop)[0], (*loop)[1], (*loop)[2], (*loop)[3], ex.what());
+					e.ex_ptr = std::current_exception();
+					e.thread_name = "ReaderWriter Thread";
+					std::lock_guard<std::mutex> gaurd(exceptMutex);
+					allExceptions.push_back(e);
+					success = false;
 				}
 				catch(std::runtime_error &ex){
 					elogger->error("Invalid data while object creation : {}, {}, {}, {}, Exception : {}", 
 					(*loop)[0], (*loop)[1], (*loop)[2], (*loop)[3], ex.what());
+					e.ex_ptr = std::current_exception();
+					e.thread_name = "ReaderWriter Thread";
+					std::lock_guard<std::mutex> gaurd(exceptMutex);
+					allExceptions.push_back(e);
+					success = false;
 				}
 			}
 		}
 		catch (std::ios_base::failure &ex) {
 			elogger->error("Can not open file orders.csv {}", ex.what());
+			success = false;
 		}
 		elogger->info("*** Reader Writer Ended ...");
 		dataExausted.test_and_set();
 		orderSyncCond.notify_one();
 	}
 	catch(const exception& ex) {
-		ExceptionRecord e;
 		e.ex_ptr = std::current_exception();
 		e.thread_name = "ReaderWriter Thread";
 		std::lock_guard<std::mutex> gaurd(exceptMutex);
 		allExceptions.push_back(e);
-		return false;
+		success = false;
 	}
-	return true;
+	return (success ? true: false);
 }
 
 // this function creates thread(s) and allocates work for thread
 // this is a boss thread func.
 // output : bool - true on success full exit.
  bool OrderMatching::matchingProcess(void){
-	 try {
-		elogger->info("**** Matching Process Started *****");
-		// pending orders
-		while (true) {
-			// There is scope for parallelizing the matching proces.
-			// if multiple processors exists, We can create multi-ple macthers,
-			// for multiple stocks.
-			// Waiting till data get ready
-			std::unique_lock<std::mutex> lk(orderSyncMutex);
-			elogger->info("Matching process waiting for orders ...");
-			orderSyncCond.wait(lk, [](){return nextOrder < orderCount;});
 
-			while(nextOrder < orderCount) {
+	elogger->info("**** Matching Process Started *****");
+	bool success = true;
+		// pending orders
+	while (true) {
+
+		// There is scope for parallelizing the matching proces.
+		// if multiple processors exists, We can create multi-ple macthers,
+		// for multiple stocks.
+		// Waiting till data get ready
+		std::unique_lock<std::mutex> lk(orderSyncMutex);
+		elogger->info("Matching process waiting for orders ...");
+		orderSyncCond.wait(lk, [](){return nextOrder < orderCount;});
+
+		while(nextOrder < orderCount) {
+			try {
 				// elogger->info("Processing {}", orderBook[nextOrder]);
 				bool status = matcher(orderBook[nextOrder]);
 				if (status) {
@@ -138,24 +158,23 @@ bool OrderMatching::readerWriterProcess(void) {
 					elogger->info("Not Success : order {}", orderBook[nextOrder]);
 				}
 				nextOrder.fetch_add(1);
+			}			
+			catch(const exception& ex) {
+				ExceptionRecord e;
+				e.ex_ptr = std::current_exception();
+				e.thread_name = "Matching Thread";
+				std::lock_guard<std::mutex> gaurd(exceptMutex);
+				allExceptions.push_back(e);
+				success = false;
 			}
-			// notifying boss that, I'm done.
-			
-			// this happens at the end-of-the-day 
-			// data exausted
-			if(dataExausted.test_and_set()) break;
 		}
-		elogger->info("**** Mathing Process Ended *****");
-		return false;
-	 }
-	catch(const exception& ex) {
-		ExceptionRecord e;
-		e.ex_ptr = std::current_exception();
-		e.thread_name = "Matching Thread";
-		std::lock_guard<std::mutex> gaurd(exceptMutex);
-		allExceptions.push_back(e);
-		return false;
+		// this happens at the end-of-the-day 
+		// data exausted
+		if(dataExausted.test_and_set()) break;
 	}
+	elogger->info("**** Mathing Process Ended *****");
+	return (success ? true : false);
+
 }
 
 // This methed macthes orders, and updates status as success on both the sides.

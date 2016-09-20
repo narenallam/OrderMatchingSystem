@@ -179,7 +179,6 @@ bool OrderMatching::readerWriterProcess(void) {
 	}
 	elogger->info("**** Mathing Process Ended *****");
 	return (success ? true : false);
-
 }
 
 // This methed macthes orders, and updates status as success on both the sides.

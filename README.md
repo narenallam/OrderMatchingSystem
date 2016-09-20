@@ -55,7 +55,7 @@
         * 98% apllication logic is designed using lock-free concurrency.
         * Memory pooling is used to reduce the memory allocation costs(boost::lockfree::spsc_queue)
     scalablity: 
-        as we did lock-free appraoch application is highly-scalable
+        as we did lock-free approach application is highly-scalable
 ## Used concepts
 
     Multithreading : 

@@ -56,22 +56,32 @@
         Note: Even we have two order queues, one queue will always be empty(either buy or sell).
               Mather is being used by a single thread. When we have more cores available we can
               create thread-per-stock, and better through-put is possible by parallelizing.
-    
-    Treading model:
-    
-        * Used Producer - Consumer and Boss-Worker threading models
-        * The design depends on 'which runs faster' strategy(Producer or Consumer).
-        * In a typical trading system producer is always faster than the consumer
-        * if procducer is taking X time and consumer is taking Y time to process, 
-          and X > Y, we create X/Y Producer threads, if those many processors are available.
-        * 98% application logic is designed using lock-free concurrency.
-        * Memory pooling is used to reduce the memory allocation costs(boost::lockfree::spsc_queue)
+              
+    Concurrency:
+        Application is designed in multi-threaded way.
         
-        Note: I haven't taken the advantage of lock free, because only one thread is working on a orderqueue,
-        as my laptop is dual core, but the memory-pooled concept of boost::lockfree::spsc_queue is utilized.
+        Threading Model:
+            * Used Producer - Consumer and Boss-Worker threading models
+            * The design depends on 'which runs faster' strategy(Producer or Consumer).
+            * In a typical trading system producer is always faster than the consumer
+            * if procducer is taking X time and consumer is taking Y time to process, 
+              and X > Y, we create X/Y Producer threads, if those many processors are available.
+            * 98% application logic is designed using lock-free concurrency.
+            
+        There are 3 main treads:
+        1. orderProcess - Boss thread, which controls remaining 2 threads.
+        2. matchingProcess - Wroker(Consumer) thread,  this is where the business logic goes.
+        3. readerWriterProcess - Worker(Producer) thread, this thread provides data feed for matchingProcess.
+        4. Producer and Consumer threads are synchronized by using condition_variable(rare) and atomics(frequent)
+        5. Boss and Worker threads are synchronozed by using atomics<>
+
+        OrderMatching.cpp is the main source file which contains definitions for all of the above functionalities.
+        
+        Note: I haven't completely taken the advantage of lock-free on orderqueue, because only one thread should be working on it,
+        but the memory-pooled concept of boost::lockfree::spsc_queue is utilized.
               
     Scalability:
-    
+        
         As, the data structures are lock-free, and there is scope for high-scalability.
         
 ## Used concepts
@@ -221,11 +231,11 @@
 
 # Conclusion
 
-### Order Matching Application is, 
+### Order Matching Application satisfies below criteria, 
 
 ## 1) 100% functional
 
-    aplication is 100% functional, as it is satisfied all the test scenarios.
+    Aplication is 100% functional, as it is satisfied all the use-cases.
 
 ## 2) TDD (Test Driven Development)
 
@@ -239,28 +249,22 @@
 
     *** No errors detected
 
-## 3) Well designed : 
+## 3) Approach and Design: 
      Refer Approach and Design
    
-## 5) Multithreaded : Managing concurrency (Multithreading)
+## 5) Managing concurrency (Multithreading)
+     Refer Approach and Design
 
-    Designed in multi-threaded way.
-    There are 3 main treads:
-        1. orderProcess - Boss thread, which controls remaining 2 threads.
-        2. matchingProcess - Wroker(Consumer) thread,  this is where the business logic goes.
-        3. readerWriterProcess - Worker(Producer) thread, this thread provides data feed for matchingProcess.
-
-        OrderMatching.cpp is the main source file which contains definitions for all of the above functionalities.
 ## 6) Latency/Performance (What is the latency of your application, if 1 million Buy and Sell orders on multiple stocks are placed?) 
-#### Near real-time :
-        This includes logging - running on single core
+#### Near real-time:
+        This includes logging - applivcation is running on a dual core, one core is for Producer one core is for Consumer.
 
         Time taken to process 1000000 orders : 4.25691 secs [random stocks]
             - The above latency can be reduced by parallelizing
         Time taken to process 1000001 orders : 4.20522 secs [single stock] - 
             - The above latency can be reduced
 
-## 7) Usage of Data structures
+## 7) Usage of Data structures:
 
         used std::unordered_map
         std::vector

@@ -45,39 +45,50 @@
 
 ## Design and Approach
 
-    There are two unordered_maps one for sell and one for buy.
-    Each map contains {stock: orderqueue} associations.
-    orderqueue is self-managed, memory-pooled and lock-free container.
-    When a new buy order arrives, matcher deducts all sell orders from the  orderqueue, 
-    and updates the status to 'Success'
-    When a new sell order arrives, matcher deducts all buy orders from the  orderqueue,
-    and updates the status to 'Success'.
+    * There are two unordered_maps one for sell and one for buy.
+    * Each map contains {stock: orderqueue} associations.
+    * orderqueue is memory-pooled container, faster pop() and push() operations.
+    * When a new buy order arrives, matcher deducts all sell orders from the  orderqueue, 
+      and updates the status to 'Success'
+    * When a new sell order arrives, matcher deducts all buy orders from the  orderqueue,
+      and updates the status to 'Success'.
 
-        Note: Even we have two order quques, one queue will always be empty(either buy or sell).
-              Application is single threaded.
+        Note: Even we have two order queues, one queue will always be empty(either buy or sell).
+              Mather is being used by a single thread. When we have more cores available we can
+              create thread-per-stock, and better through-put is possible by parallelizing.
     
     Treading model:
+    
         * Used Producer - Consumer and Boss-Worker threading models
-        * The design depends on which runs faster(Producer or Consumer).
+        * The design depends on 'which runs faster' strategy(Producer or Consumer).
         * In a typical trading system producer is always faster than the consumer
-        * if procuder is taking X time and consumer is taking Y time to process, 
+        * if procducer is taking X time and consumer is taking Y time to process, 
           and X > Y, we create X/Y Producer threads, if those many processors are available.
-        * 98% apllication logic is designed using lock-free concurrency.
+        * 98% application logic is designed using lock-free concurrency.
         * Memory pooling is used to reduce the memory allocation costs(boost::lockfree::spsc_queue)
-    scalablity: 
-        As, the data structures are lock-free, and  application is highly-scalable
+        
+        Note: I haven't taken the advantage of lock free, because only one thread is working on a orderqueue,
+        as my laptop is dual core, but the memory-pooled concept of boost::lockfree::spsc_queue is utilized.
+              
+    Scalability:
+    
+        As, the data structures are lock-free, and there is scope for high-scalability.
+        
 ## Used concepts
 
     Multithreading : 
         * used std::thread for multithreading
+        
     Synchronization :
         * Used lock based concurrency primitives like std::mutex, std::condition_variable.
         * Used lock-free concurrency options like Boost::lockfree::spsc_quque std::atomic_flag, std::atomics<>
         * boost::lockfree::spsc_quque - is used for memory pool based memory allocation, which reduced latency to microseconds.
+        
     Data Structures:
         * std::vector # for multi-threaded exception handling
         * std::unordered_map # for stock matching
         * boost::lockfree::spsc_queue # for stock matching
+        
     Designpatterns:
         * singleton designpattern is used for Logger objects
 
@@ -102,16 +113,16 @@
         $ python DataGenerator.py 10
         - above command generates orders.csv with random Buy and Sell of Random Quantity
         $ python DataGenerator.py sample
-        - above command generates sample data of 10 orders and creats orders.csv
+        - above command generates sample data of 10 orders and creates orders.csv
 
 ## Utilities
 
     Logger.hpp - this is a wrapper for 'spdlog' - fast asynchronous logging
-        console and file based logging hasbeen implemented, console based logging is used in the application for time being.
+        console and file based logging has been implemented, console based logging is used in the application for time being.
     Boost::test - for unit testing
     CSVIterator.hpp - for csv reading
 
-## How to run the apllication
+## How to run the application
 
 ### Prerequisites:
 
@@ -183,7 +194,7 @@
 ## Performance and Benchmarking
 
     Various performance and load tests are conducted.
-    When there are a million orders on a single stock, that will be the worst case behaviour of the application.
+    When there are a million orders on a single stock, that will be the worst case behavior of the application.
     The below benchmarks include log processing.
 
     NarenMacBook% python DataGenerator.py 1000000 -flood
@@ -218,7 +229,7 @@
 
 ## 2) TDD (Test Driven Development)
 
-    Development started with Boost::Test unit tests. Completed by making unit tests successfull.
+    Development started with Boost::Test unit tests. Completed by making unit tests successful.
 
     NarenMacBook% ./runtests
     Running 3 test cases...
@@ -237,7 +248,7 @@
     There are 3 main treads:
         1. orderProcess - Boss thread, which controls remaining 2 threads.
         2. matchingProcess - Wroker(Consumer) thread,  this is where the business logic goes.
-        3. readerWriterProcess - Worker(Prodcuer) thread, this thread provides data feed for matchingProcess.
+        3. readerWriterProcess - Worker(Producer) thread, this thread provides data feed for matchingProcess.
 
         OrderMatching.cpp is the main source file which contains definitions for all of the above functionalities.
 ## 6) Latency/Performance (What is the latency of your application, if 1 million Buy and Sell orders on multiple stocks are placed?) 
@@ -245,11 +256,12 @@
         This includes logging - running on single core
 
         Time taken to process 1000000 orders : 4.25691 secs [random stocks]
-        Time taken to process 1000001 orders : 4.20522 secs [single stock]
+            - The above latency can be reduced by parallelizing
+        Time taken to process 1000001 orders : 4.20522 secs [single stock] - 
+            - The above latency can be reduced
 
+## 7) Usage of Data structures
 
-## 7) Well Constructed and Performant : Usage of Data structures.
-
-    used std::unordered_map
-    std::vector
-    used boost::lockfree::spsc_queue
+        used std::unordered_map
+        std::vector
+        used boost::lockfree::spsc_queue

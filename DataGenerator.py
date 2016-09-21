@@ -1,6 +1,4 @@
-
 """
-------------------------------------------------------------------------------
 File: 
     DataGenerator.py
 Author:
@@ -23,13 +21,12 @@ Usage :
     $ python DataGenerator.py sample
     - above command generates sample data of 10 orders and creats orders.csv
 
-Data Intrepretation:
-------------------------------------------------------------------------------
+Data Interpretation:
+
 Traders    :- Trader_1, Trader_2,....no limit
 Stocks     :- Stocks_A, Stock_B,...Stock_Z
 Quantities :- 100, 200, 3000 - 10000
 Side       :- Buy or Sell
-------------------------------------------------------------------------------
 """
 
 from random import sample

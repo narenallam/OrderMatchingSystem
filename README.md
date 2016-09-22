@@ -65,7 +65,7 @@
             * The design depends on 'which runs faster' strategy(Producer or Consumer).
             * In a typical trading system producer is always faster than the consumer
             * if procducer is taking X time and consumer is taking Y time to process, 
-              and X > Y, we create X/Y Producer threads, if those many processors are available.
+              and X < Y, we create Y/X Consumer threads, if those many processors are available.
             * 98% application logic is designed using lock-free concurrency.
             
         There are 3 main treads:

@@ -205,6 +205,7 @@
 
     Various performance and load tests are conducted.
     When there are a million orders on a single stock, that will be the worst case behavior of the application.
+    We can reduce this by prallelizing the 'Success' updating task.
     The below benchmarks include log processing.
 
     NarenMacBook% python DataGenerator.py 1000000 -flood
@@ -257,12 +258,12 @@
 
 ## 6) Latency/Performance (What is the latency of your application, if 1 million Buy and Sell orders on multiple stocks are placed?) 
 #### Near real-time:
-        This includes logging - applivcation is running on a dual core, one core is for Producer one core is for Consumer.
+        This includes logging - application is running on a dual core, one core is for Producer one core is for Consumer.
 
         Time taken to process 1000000 orders : 4.25691 secs [random stocks]
-            - The above latency can be reduced by parallelizing
+            - The above latency can be reduced by parallelizing stock processing.
         Time taken to process 1000001 orders : 4.20522 secs [single stock] - 
-            - The above latency can be reduced
+            - The above latency can be reduced by parallelizing 'Success' update process
 
 ## 7) Usage of Data structures:
 

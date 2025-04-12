@@ -34,3 +34,7 @@ EXT_LIBS = /opt/homebrew/lib
 HEADERS = Include
 # LIBS: Path to project libraries
 LIBS = Lib
+
+# Added explicit Boost configuration - using system installed Boost 1.87
+BOOST_VERSION = system
+BOOST_LIBS = -lboost_unit_test_framework

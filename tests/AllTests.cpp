@@ -3,8 +3,8 @@
 // external declerations
 extern std::atomic<unsigned long> orderCount;
 extern std::atomic<unsigned long> nextOrder;
-extern std::atomic_flag dataExausted;
-extern std::atomic_flag dataReady;
+extern std::atomic<bool> dataExausted;  // Fixed: Changed from std::atomic_flag to std::atomic<bool>
+extern std::atomic<bool> dataReady;     // Fixed: Changed from std::atomic_flag to std::atomic<bool>
 
 extern std::mutex orderSyncMutex;
 extern std::condition_variable orderSyncCond;

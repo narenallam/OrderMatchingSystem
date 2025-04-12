@@ -1,29 +1,34 @@
 #ifndef __LOGGER_HPP__
 #define __LOGGER_HPP__
 
-#define SPDLOG_FMT_EXTERNAL 0
+// Remove the redefinition of SPDLOG_FMT_EXTERNAL since it's already defined by Conan's fmt
+// #define SPDLOG_FMT_EXTERNAL 0
 
-#include <memory>
 #include <iostream>
-#include <mutex>
+#include <memory>
+#include <string>
+#include <vector>
+#include <chrono>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/daily_file_sink.h>
 
-#include "spdlog/spdlog.h"
-#include "spdlog/logger.h"
-#include <spdlog/fmt/ostr.h>
+namespace NSOrderMatching {
+    // Removed the duplicate ExceptionRecord struct
+    
+	class Logger {
 
-using namespace std;
-using namespace spdlog;
+	public:
 
-class Logger {
-    public : 
-        static shared_ptr<logger> getLogger();
-        static shared_ptr<logger> getAsyncLogger();
-    private:
-        Logger(){} // no object should get created directly
-        ~Logger(){} // cannot be inherited
-        static shared_ptr<logger> _logger;
-        static shared_ptr<logger> _asyncLogger;
-        static std::mutex _mutex; // Added mutex declaration
-};
+		Logger(const Logger&) = delete;
+		Logger& operator=(const Logger&) = delete;
+		
+		Logger() = delete; // Non constructible
+		
+		static std::shared_ptr<spdlog::logger> getLogger();
+		// async file logger example
+		static std::shared_ptr<spdlog::logger> getAsyncLogger();
+
+	};
+}
 
 #endif

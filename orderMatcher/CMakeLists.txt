@@ -3,10 +3,13 @@ set(LIB_NAME order_matcher)
 # Library sources
 set(SOURCES
     OrderMatcher.cpp
+    HighPerformanceOrderBook.cpp
 )
 
-# Find thread package for threading support
+# Find dependencies
 find_package(Threads REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 # Create library target
 add_library(${LIB_NAME} STATIC ${SOURCES})
@@ -20,8 +23,9 @@ target_include_directories(${LIB_NAME}
 # Link dependencies
 target_link_libraries(${LIB_NAME} 
     PUBLIC logger
+    PUBLIC fmt::fmt
+    PUBLIC spdlog::spdlog
     PRIVATE Threads::Threads
-    PRIVATE fmt::fmt
 )
 
 # Set properties

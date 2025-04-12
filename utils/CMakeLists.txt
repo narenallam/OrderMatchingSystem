@@ -7,6 +7,8 @@ set(SOURCES
 
 # Find thread package for threading support
 find_package(Threads REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 # Create library target
 add_library(${LIB_NAME} STATIC ${SOURCES})
@@ -20,6 +22,7 @@ target_include_directories(${LIB_NAME}
 # Link dependencies
 target_link_libraries(${LIB_NAME} 
     PUBLIC fmt::fmt
+    PUBLIC spdlog::spdlog
     PRIVATE Threads::Threads
 )
 

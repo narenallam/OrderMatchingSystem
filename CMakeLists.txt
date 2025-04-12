@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.15)
 project(OrderMatchingSystem VERSION 1.0.0 LANGUAGES CXX)
 
 # Set C++ standard
@@ -11,16 +11,27 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# Dependencies
-find_package(fmt REQUIRED)
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+# Find dependencies with proper paths for Conan 2
+# First, include the generated conan cmake file if it exists
+if(EXISTS "${CMAKE_BINARY_DIR}/conan_toolchain.cmake")
+    include("${CMAKE_BINARY_DIR}/conan_toolchain.cmake")
+endif()
+
+# Find system boost instead of using Conan's
+find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+message(STATUS "Found Boost version: ${Boost_VERSION}")
+
+# Find other dependencies with explicit required components
+find_package(fmt CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(Threads REQUIRED)
 
 # Options
 option(BUILD_TESTS "Build test suite" ON)
 option(BUILD_WITH_COVERAGE "Build with code coverage" OFF)
 
 # Include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include ${Boost_INCLUDE_DIRS})
 
 # Set compilation flags
 if(MSVC)
@@ -38,10 +49,13 @@ add_subdirectory(orderMatcher)
 
 # Create main executable
 add_executable(run Main.cpp)
+
+# Make sure the libraries are linked in the correct order
 target_link_libraries(run 
     PRIVATE 
     order_matcher 
     logger 
+    spdlog::spdlog
     fmt::fmt
     Boost::boost
     ${CMAKE_THREAD_LIBS_INIT}

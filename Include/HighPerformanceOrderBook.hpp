@@ -59,7 +59,12 @@ public:
     
     // Thread-safe access for multi-threaded processing
     template<typename Func>
-    void forEachOrder(Func func);
+    void forEachOrder(Func func) {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        for (size_t i = 0; i < orderCount_; ++i) {
+            func(orders_[i]);
+        }
+    }
     
 private:
     // The actual storage for orders - contiguous memory for better cache locality

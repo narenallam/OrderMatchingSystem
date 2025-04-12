@@ -4,6 +4,11 @@
 
 namespace NSOrderMatching {
 
+// Store block sizes
+struct BlockInfo {
+    size_t size;
+};
+
 // MemoryPool implementation
 MemoryPool::MemoryPool(size_t objectSize, size_t initialCapacity)
     : objectSize_(objectSize) {
@@ -29,7 +34,7 @@ void* MemoryPool::allocate() {
     
     if (freeList_.empty()) {
         // Allocate a new block with twice the size of the last block
-        size_t newBlockSize = blocks_.empty() ? 1024 : blocks_.back().get_deleter().size * 2;
+        size_t newBlockSize = blocks_.empty() ? 1024 : 2048;  // Fixed initial block sizes
         auto newBlock = std::make_unique<char[]>(objectSize_ * newBlockSize);
         
         // Add all objects from the new block to the free list
@@ -148,14 +153,7 @@ std::vector<std::reference_wrapper<Order>> HighPerformanceOrderBook::getOrdersBy
     return result;
 }
 
-template<typename Func>
-void HighPerformanceOrderBook::forEachOrder(Func func) {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
-    
-    for (size_t i = 0; i < orderCount_; ++i) {
-        func(orders_[i]);
-    }
-}
+// Removed the forEachOrder template implementation since it's already in the header
 
 // OrderIterator implementation
 HighPerformanceOrderBook::OrderIterator HighPerformanceOrderBook::begin() const {

@@ -1,0 +1,40 @@
+# Conan-generated files
+cmakedeps_macros.cmake
+conan_toolchain.cmake
+conanbuild.sh
+conanbuildenv-*.sh
+conandeps_legacy.cmake
+conanrun.sh
+conanrunenv-*.sh
+deactivate_conanbuild.sh
+deactivate_conanrun.sh
+fmt-*.cmake
+spdlog-*.cmake
+*Targets.cmake
+
+# Build directory and compiled files
+build/
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+run
+runtests
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/ 

@@ -137,6 +137,16 @@ namespace NSOrderMatching {
         bool isLeftOver{false};
         QuantityTrader leftOver{0,0}; // leftover quantity of stock in the last run
     };
+
+    // Exception Record for storing thread-level exceptions
+    struct ExceptionRecord {
+        std::exception_ptr ex_ptr;
+        // thread where exception occurred
+        std::string thread_name;
+        // timestamp when exception occurred
+        std::chrono::system_clock::time_point timestamp;
+    };
+
 }
 
 // Specialization of fmt::formatter for the Order class
@@ -186,15 +196,8 @@ extern std::atomic<bool> dataExausted;
 extern std::atomic<unsigned long> orderCount;
 extern std::atomic<unsigned long> nextOrder;
 
-// small utility struct for exception-handling
-struct ExceptionRecord{
-    std::string thread_name;  // Changed from const char* to std::string
-    std::exception_ptr ex_ptr;
-    std::chrono::system_clock::time_point timestamp;  // Added timestamp for debugging
-};
-
 // for multi-threaded exception handling
-extern std::vector<ExceptionRecord> allExceptions;
+extern std::vector<NSOrderMatching::ExceptionRecord> allExceptions;
 extern std::mutex exceptMutex;
 
 // END - Global data shared by all threads ---------

@@ -5,12 +5,17 @@ set(TEST_SOURCES
     AllTests.cpp
 )
 
+# Find dependencies
+find_package(fmt CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+
 # Add the test executable
 add_executable(${TEST_NAME} ${TEST_SOURCES})
 
 # Set include directories
 target_include_directories(${TEST_NAME}
     PRIVATE ${CMAKE_SOURCE_DIR}/Include
+    PRIVATE ${Boost_INCLUDE_DIRS}
 )
 
 # Link dependencies
@@ -19,6 +24,7 @@ target_link_libraries(${TEST_NAME}
     PRIVATE logger
     PRIVATE Boost::unit_test_framework
     PRIVATE fmt::fmt
+    PRIVATE spdlog::spdlog
 )
 
 # Add test to CTest
@@ -33,9 +39,11 @@ target_link_libraries(${STRESS_TEST_NAME}
     PRIVATE logger
     PRIVATE Boost::unit_test_framework
     PRIVATE fmt::fmt
+    PRIVATE spdlog::spdlog
 )
 target_include_directories(${STRESS_TEST_NAME}
     PRIVATE ${CMAKE_SOURCE_DIR}/Include
+    PRIVATE ${Boost_INCLUDE_DIRS}
 )
 
 # Add property-based test for order matching logic
@@ -46,9 +54,11 @@ target_link_libraries(${PROP_TEST_NAME}
     PRIVATE logger
     PRIVATE Boost::unit_test_framework
     PRIVATE fmt::fmt
+    PRIVATE spdlog::spdlog
 )
 target_include_directories(${PROP_TEST_NAME}
     PRIVATE ${CMAKE_SOURCE_DIR}/Include
+    PRIVATE ${Boost_INCLUDE_DIRS}
 )
 
 # Add code coverage target if enabled

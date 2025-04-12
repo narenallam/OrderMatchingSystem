@@ -8,6 +8,9 @@ OBJLIBS = ../$(LIBS)/liblogger.a
 # PREFIX is the relative path of External Include Libraries
 PREFIX = ..
 
+# Add fmt include path (using absolute path)
+FMT_INCLUDE := -I/opt/homebrew/include
+
 all: $(OBJLIBS)
 
 $(OBJLIBS): $(OBJECTS)
@@ -15,10 +18,11 @@ $(OBJLIBS): $(OBJECTS)
 	$(AR) $(ARFLAGS) $(OBJLIBS) $?
 	$(RANLIB) $(OBJLIBS)
 	@echo
+
 # To obtain object files
 $(OBJECTS):
 	@echo
-	$(CC) -c $(CC_FLAGS) $(LD_FLAGS) -I../$(HEADERS) -L../$(LIBS) $(EXT_REC_HEADERS) -L../$(EXT_LIBS) Logger.cpp
+	$(CC) -c $(CC_FLAGS) $(LD_FLAGS) -I../$(HEADERS) $(FMT_INCLUDE) -L../$(LIBS) $(EXT_REC_HEADERS) Logger.cpp
 # To remove generated files
 clean:
 	@echo

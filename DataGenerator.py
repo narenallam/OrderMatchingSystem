@@ -9,30 +9,14 @@ Description:
     random - this is default
     flood - generates data for single stock(Stock_X),
             this is for load testing.
-Syntax:
-    1. python DataGenerator.py [number of records] [-flood]
-    2. python DataGenerator.py -sample
-Usage :
-    e.g,
-    $ python DataGenerator.py 100000 flood 
-    - above command generates orders.csv a file with 100000 records all 'Buy's of qty 1 and one 'Sell' of Stock_X
-    $ python DataGenerator.py 10
-    - above command generates orders.csv with random Buy and Sell of Randome Quantity
-    $ python DataGenerator.py sample
-    - above command generates sample data of 10 orders and creats orders.csv
-
-Data Interpretation:
-
-Traders    :- Trader_1, Trader_2,....no limit
-Stocks     :- Stocks_A, Stock_B,...Stock_Z
-Quantities :- 100, 200, 3000 - 10000
-Side       :- Buy or Sell
 """
 
+import click
+import string
 from random import sample
-import sys
 
-SAMPLE_DATA ='''Trader_2,Stock_X,500,Buy
+# Constants
+SAMPLE_DATA = '''Trader_2,Stock_X,500,Buy
 Trader_3,Stock_X,700,Buy
 Trader_5,Stock_X,1000,Sell
 Trader_5,Stock_X,200,Sell
@@ -43,66 +27,81 @@ Trader_5,Stock_Z,1000,Sell
 Trader_2,Stock_Z,200,Buy
 Trader_4,Stock_Z,800,Buy'''
 
-# STOCK_TYPE_COUNT = 5 # This generates Stock_Z to Stock_V
 STOCK_TYPE_COUNT = 3
 TRADER_TYPE_COUNT = 5
-# MAX_QAUNTITY = 100000 # Max quantity for one order
-MAX_QAUNTITY = 1000
-STOCKS = ['Stock_'+chr(65+i) for i in range(25,  25-STOCK_TYPE_COUNT, -1)]
-def main():
-    record_count = 10
-    flood = False
-    if len(sys.argv) > 4 :
-        print("Invalid number of options: %s" ,len(sys.argv))
-        usage()
+MAX_QUANTITY = 1000
+STOCKS = ['Stock_' + chr(65 + i) for i in range(25, 25 - STOCK_TYPE_COUNT, -1)]
 
-    if len(sys.argv) > 2 :
-            if (sys.argv[2].lower() == '-flood'):
-                flood = True
-            else:
-                print("Invalid option: " ,sys.argv[2])
-                print("Error: orders.csv cannot be generated!")
-                usage()
-                return
+# Helper functions
+def generate_random_orders(count, file):
+    """Generate random buy/sell orders with random stocks, quantities, and traders"""
+    traders = [f'Trader_{i+1}' for i in range(TRADER_TYPE_COUNT + 1)]
+    quantities = [str(x) for x in range(100, MAX_QUANTITY + 1, 100)]
+    sides = ['Buy', 'Sell']
+    
+    for _ in range(count):
+        trader = sample(traders, 1)[0]
+        stock = sample(STOCKS, 1)[0]
+        quantity = sample(quantities, 1)[0]
+        side = sample(sides, 1)[0]
+        file.write(f"{trader},{stock},{quantity},{side}\n")
 
-    if len(sys.argv) > 1:
-        if sys.argv[1].lower() == '-sample':
-            with open('orders.csv', 'w') as f:
-                f.write(SAMPLE_DATA)
-                print("Success: sample orders.csv generated!")
-                return
-        try : 
-            record_count = int(sys.argv[1])
-        except Exception as ex:
-            print("Invalid count = ", sys.argv[1], ", exception : ", str(ex))
-            print("Error: orders.csv cannot be generated!")
-            usage()
-            return
+def generate_flood_orders(count, file):
+    """Generate flood orders for load testing - many buys and one big sell"""
+    # Use all possible trader names to avoid running out of traders
+    traders = [f'Trader_{c}' for c in string.ascii_uppercase]
+    
+    # Generate 'count' buy orders, cycling through traders as needed
+    for i in range(count):
+        trader_idx = i % len(traders)
+        file.write(f"{traders[trader_idx]},Stock_X,1,Buy\n")
+    
+    # Add the final sell order matching all buys
+    file.write(f'Trader_Z,Stock_X,{count},Sell\n')
 
-    with open('orders.csv', 'w')as f:
-        if not flood:
-            for i in range(record_count):
-                f.write(sample(['Trader_'+str(i+1) for i in range(TRADER_TYPE_COUNT+1)], 1)[0]+','+sample(STOCKS, 1)[0]+','+
-                sample([str(x) for x in range(100, MAX_QAUNTITY+1, 100)],1)[0]+','+sample(['Buy', 'Sell'], 1)[0]+'\n')
-            print("Success: orders.csv generated! with %s random records."%record_count)
-        else:
-            for i in range(record_count):
-                f.write(sample(['Trader_'+chr(65+i) for i in range(26)], 1)[0]+ ','+'Stock_X'+','+ '1'+','+'Buy'+'\n')
-            f.write('Trader_Z'+ ','+'Stock_X'+','+ str(record_count)+','+'Sell')
-            print("Success: orders.csv generated! with %s single stock records."%record_count)
-       
+def generate_sample_data(file):
+    """Generate sample data for testing"""
+    file.write(SAMPLE_DATA)
 
-def usage():
-    print('''
-Syntax:
-    1. python DataGenerator.py [number ofrecords] [-flood]
-    2. python DataGenerator.py -sample
-Usage:
-    e.g,
-    $ python DataGenerator.py 100000 flood 
-    - above command generates orders.csv a file with 100000 records all 'Buy's of qty 1 and one 'Sell' of Stock_X
-    $ python DataGenerator.py 10
-    - above command generates orders.csv with random Buy and Sell of Randome Quantity
-    $ python DataGenerator.py sample
-    - above command generates sample data of 10 orders and creats orders.csv''')
-if __name__ == '__main__': main()
+@click.group()
+def cli():
+    """Order Matching System - Data Generator
+
+    This tool generates test data for the Order Matching System.
+    """
+    pass
+
+@cli.command('random')
+@click.argument('count', type=click.INT, default=10)
+def random_cmd(count):
+    """Generate random buy/sell orders.
+    
+    COUNT is the number of records to generate (default: 10)
+    """
+    with open('orders.csv', 'w') as f:
+        generate_random_orders(count, f)
+    click.echo(f"Success: orders.csv generated with {count} random records.")
+
+@cli.command('flood')
+@click.argument('count', type=click.INT, default=10)
+def flood_cmd(count):
+    """Generate flood orders for load testing.
+    
+    COUNT is the number of records to generate (default: 10)
+    """
+    with open('orders.csv', 'w') as f:
+        generate_flood_orders(count, f)
+    click.echo(f"Success: orders.csv generated with {count} single stock records for load testing.")
+
+@cli.command('sample')
+def sample_cmd():
+    """Generate sample data for testing."""
+    with open('orders.csv', 'w') as f:
+        generate_sample_data(f)
+    click.echo("Success: sample orders.csv generated!")
+
+if __name__ == '__main__':
+    try:
+        cli()
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)

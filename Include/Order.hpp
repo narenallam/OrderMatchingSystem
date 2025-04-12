@@ -10,14 +10,21 @@
 #include <queue>
 #include <boost/lockfree/queue.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
+#include <fmt/format.h>
 
 namespace NSOrderMatching {
         
-    // Constants 
+    // Constants - moved to a central configuration section for easier maintenance
     const long int MAX_STRING_LENGTH = 32;
     const long int MAX_QUANTITY = 10000;
     const long int INIT_ORDER_BOOK_SIZE = 1000000; // 10 million
-    const long int INIT_STOCK_QUEUE_SIZE = 1000000; // 10 million
+    const long int INIT_STOCK_QUEUE_SIZE = 1000001; // Queue size for spsc_queue (configurable)
+
+    // Configuration parameters - can be loaded from external file in a future improvement
+    struct Configuration {
+        static long int getOrderBookSize() { return INIT_ORDER_BOOK_SIZE; }
+        static long int getStockQueueSize() { return INIT_STOCK_QUEUE_SIZE; }
+    };
 
     // enumerations
     enum class TradeSide {Buy, Sell};
@@ -30,11 +37,11 @@ namespace NSOrderMatching {
 
         // Parameterized Constructor
         Order(unsigned long _ordId, std::string _trader, std::string _stock, TradeSide _side, unsigned long _qty): 
-              orderId{_ordId}, trader{_trader}, stock{_stock}, 
+              orderId{_ordId}, trader{std::move(_trader)}, stock{std::move(_stock)}, 
               side{_side}, quantity{_qty}, status{OrderStatus::Open}{}
 
         // copy constructor 
-        Order(Order & ordr):
+        Order(const Order& ordr):
             orderId{ordr.orderId},
             trader{ordr.trader},
             stock{ordr.stock},
@@ -42,11 +49,27 @@ namespace NSOrderMatching {
             quantity{ordr.quantity},
             status{ordr.status}{}
             
-        // trivial move constructor
-        Order(Order && ordr) = default;
-
-        // trivial move assigment
-        Order& operator=(Order && ordr) = default;
+        // Properly implemented move constructor to ensure efficient moving of string members
+        Order(Order && ordr) noexcept :
+            orderId{ordr.orderId},
+            trader{std::move(ordr.trader)},
+            stock{std::move(ordr.stock)},
+            side{ordr.side},
+            quantity{ordr.quantity},
+            status{ordr.status} {}
+        
+        // Move assignment operator - explicitly defined for string efficiency
+        Order& operator=(Order && ordr) noexcept {
+            if (this != &ordr) {
+                orderId = ordr.orderId;
+                trader = std::move(ordr.trader);
+                stock = std::move(ordr.stock);
+                side = ordr.side;
+                quantity = ordr.quantity;
+                status = ordr.status;
+            }
+            return *this;
+        }
 
         // trivial destructor
         ~Order() = default;
@@ -88,7 +111,7 @@ namespace NSOrderMatching {
                        quantity{_qty}, orderId(_ordId){}
         // copy constructor
         QuantityTrader(const QuantityTrader &qtObj):
-                       quantity{qtObj.quantity}, orderId(qtObj.orderId){}
+                       quantity{qtObj.quantity}, orderId{qtObj.orderId}{}
         
         // assignment
         QuantityTrader& operator=(const QuantityTrader &qtObj) = default;
@@ -109,13 +132,32 @@ namespace NSOrderMatching {
     };
 
     struct ConcurrentStockQueue {
-        //boost::lockfree::queue<QuantityTrader> stockQueue{INIT_STOCK_QUEUE_SIZE};
-        //std::queue<QuantityTrader> stockQueue;
-        boost::lockfree::spsc_queue<QuantityTrader> stockQueue{1000001};
+        // Adding explicit cast to size_type (unsigned long) to avoid narrowing conversion error
+        boost::lockfree::spsc_queue<QuantityTrader> stockQueue{static_cast<size_t>(Configuration::getStockQueueSize())};
         bool isLeftOver{false};
         QuantityTrader leftOver{0,0}; // leftover quantity of stock in the last run
     };
 }
+
+// Specialization of fmt::formatter for the Order class
+template <>
+struct fmt::formatter<NSOrderMatching::Order> {
+    constexpr auto parse(fmt::format_parse_context& ctx) -> decltype(ctx.begin()) {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const NSOrderMatching::Order& ord, FormatContext& ctx) const -> decltype(ctx.out()) {
+        return fmt::format_to(
+            ctx.out(),
+            "Order{{orderId: {}, trader: {}, stock: {}, side: {}, quantity: {}, status: {}}}",
+            ord.orderId, ord.trader, ord.stock,
+            (ord.side == NSOrderMatching::TradeSide::Buy ? "Buy" : "Sell"),
+            ord.quantity,
+            (ord.status == NSOrderMatching::OrderStatus::Open ? "Open" : "Success")
+        );
+    }
+};
 
 // START - Global data shared by all threads ------
 // all orders are stored here
@@ -135,10 +177,10 @@ extern std::unordered_map<std::string, NSOrderMatching::ConcurrentStockQueue> bu
 extern std::unordered_map<std::string, NSOrderMatching::ConcurrentStockQueue> sellMap;
 
 // sync objects. Both threads will be synced using these objects.
-extern std::atomic_flag dataReady;
+extern std::atomic<bool> dataReady;
 extern std::mutex orderSyncMutex;
 extern std::condition_variable orderSyncCond;
-extern std::atomic_flag dataExausted;
+extern std::atomic<bool> dataExausted;
 
 // orders so far, this will be accessed by mathing engine thread
 extern std::atomic<unsigned long> orderCount;
@@ -146,8 +188,9 @@ extern std::atomic<unsigned long> nextOrder;
 
 // small utility struct for exception-handling
 struct ExceptionRecord{
-    const char* thread_name;
+    std::string thread_name;  // Changed from const char* to std::string
     std::exception_ptr ex_ptr;
+    std::chrono::system_clock::time_point timestamp;  // Added timestamp for debugging
 };
 
 // for multi-threaded exception handling

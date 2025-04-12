@@ -1,7 +1,12 @@
 #include "OrderMatcher.hpp"
 #include <chrono>
+#include <thread>
+#include <unordered_map>
+#include <vector>
+#include <functional>
+#include <algorithm>
 
-// namespace declerations
+// namespace declarations
 using namespace std;
 using namespace spdlog;
 using namespace NSOrderMatching;
@@ -9,18 +14,25 @@ using namespace NSOrderMatching;
 // external definitions
 std::atomic<unsigned long> orderCount{0};
 std::atomic<unsigned long> nextOrder{0};
-std::atomic_flag dataExausted{ATOMIC_FLAG_INIT};
-std::atomic_flag dataReady{ATOMIC_FLAG_INIT};
+std::atomic<bool> dataExausted{false};  
+std::atomic<bool> dataReady{false};     
 
 std::mutex orderSyncMutex;
 std::condition_variable orderSyncCond;
 std::mutex exceptMutex;
 
-std::vector<Order> orderBook;
-std::unordered_map<std::string, ConcurrentStockQueue> buyMap;
-std::unordered_map<std::string, ConcurrentStockQueue> sellMap;
+// Replace global vector with high-performance order book
+std::unique_ptr<HighPerformanceOrderBook> OrderMatching::orderBook = std::make_unique<HighPerformanceOrderBook>(INIT_ORDER_BOOK_SIZE);
+
+// Fine-grained locking for stock queues
+OrderMatching::StockQueueMap OrderMatching::buyMap;
+OrderMatching::StockQueueMap OrderMatching::sellMap;
+
 std::vector<ExceptionRecord> allExceptions;
 
+// Thread pool for processing orders by stock
+std::unique_ptr<OrderMatching::OrderProcessorThreadPool> OrderMatching::threadPool = 
+    std::make_unique<OrderMatching::OrderProcessorThreadPool>();
 
 // logger objects for OrderBook class
 // asynchronous console logger
@@ -28,11 +40,110 @@ shared_ptr<logger> OrderMatching::clogger;
 // asynchronous file logger
 shared_ptr<logger> OrderMatching::elogger;
 
+// Thread pool implementation
+OrderMatching::OrderProcessorThreadPool::OrderProcessorThreadPool(size_t numThreads) {
+    // Create worker threads
+    for (size_t i = 0; i < numThreads; ++i) {
+        threads_.emplace_back(&OrderProcessorThreadPool::workerThread, this);
+    }
+}
+
+OrderMatching::OrderProcessorThreadPool::~OrderProcessorThreadPool() {
+    {
+        std::unique_lock<std::mutex> lock(queueMutex_);
+        stop_ = true;
+        condition_.notify_all();
+    }
+    
+    // Join all threads
+    for (auto& thread : threads_) {
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
+}
+
+void OrderMatching::OrderProcessorThreadPool::workerThread() {
+    while (true) {
+        std::string stock;
+        
+        {
+            std::unique_lock<std::mutex> lock(queueMutex_);
+            condition_.wait(lock, [this] { return stop_ || !taskQueue_.empty(); });
+            
+            if (stop_ && taskQueue_.empty()) {
+                return;
+            }
+            
+            stock = taskQueue_.back();
+            taskQueue_.pop_back();
+        }
+        
+        // Process the stock
+        OrderMatching::processStockOrders(stock);
+    }
+}
+
+std::future<void> OrderMatching::OrderProcessorThreadPool::submitTask(const std::string& stock) {
+    auto task = std::make_shared<std::packaged_task<void()>>(
+        [stock]() { OrderMatching::processStockOrders(stock); }
+    );
+    
+    {
+        std::unique_lock<std::mutex> lock(queueMutex_);
+        taskQueue_.push_back(stock);
+    }
+    
+    condition_.notify_one();
+    return task->get_future();
+}
+
 OrderMatching::OrderMatching(){
 	clogger = Logger::getLogger(); 
 	elogger = Logger::getAsyncLogger();
-	orderBook.reserve(INIT_ORDER_BOOK_SIZE);
 	elogger->debug("OrderBook created with size : {}", INIT_ORDER_BOOK_SIZE);
+}
+
+// Copy constructor implementation
+OrderMatching::OrderMatching(const OrderMatching& ordMatcher) {
+    clogger = ordMatcher.clogger;
+    elogger = ordMatcher.elogger;
+    elogger->debug("OrderMatching copy constructor called");
+}
+
+// Move constructor implementation
+OrderMatching::OrderMatching(OrderMatching&& ordMatcher) noexcept {
+    clogger = std::move(ordMatcher.clogger);
+    elogger = std::move(ordMatcher.elogger);
+    elogger->debug("OrderMatching move constructor called");
+}
+
+// Copy assignment operator implementation
+OrderMatching& OrderMatching::operator=(const OrderMatching& ordMatcher) {
+    if (this != &ordMatcher) {
+        clogger = ordMatcher.clogger;
+        elogger = ordMatcher.elogger;
+        elogger->debug("OrderMatching copy assignment operator called");
+    }
+    return *this;
+}
+
+// Move assignment operator implementation
+OrderMatching& OrderMatching::operator=(OrderMatching&& ordMatcher) noexcept {
+    if (this != &ordMatcher) {
+        clogger = std::move(ordMatcher.clogger);
+        elogger = std::move(ordMatcher.elogger);
+        elogger->debug("OrderMatching move assignment operator called");
+    }
+    return *this;
+}
+
+// Destructor implementation
+OrderMatching::~OrderMatching() {
+    // Only log if logger is still valid
+    if (elogger) {
+        elogger->debug("OrderMatching destructor called");
+    }
 }
 
 // orders will be entered into orderBook
@@ -40,19 +151,17 @@ OrderMatching::OrderMatching(){
 // input: Order
 // output: book - true on success fully creating a trade in orderBook.
 bool OrderMatching::enterOrder(Order && ord) {
-    elogger->debug("Order receieved! {}", ord);
+    elogger->debug("Order received! {}", ord);
 
-    // orderId is vector index position,
-    // we dont need a map for lateral access
-    ord.orderId = orderCount;
-    orderBook.emplace_back(ord);
+    // Add order to the high-performance order book
+    unsigned long orderId = orderBook->addOrder(std::move(ord));
 
     // Incrementing orderCount
     // This will be accessed by matchingProcess thread
 	orderCount.fetch_add(1);
 	orderSyncCond.notify_one();	
 
-    elogger->debug("Order placed. {}", ord);
+    elogger->debug("Order placed. Order ID: {}", orderId);
     return true;
 }
 
@@ -64,6 +173,8 @@ bool OrderMatching::readerWriterProcess(void) {
 	bool success = true;
 	try {
 		elogger->info("*** Reader Writer Started ...");
+		auto start_time = std::chrono::high_resolution_clock::now();
+		
 		try{
 			std::ifstream feedFile("orders.csv");
 			// iterating csv till end
@@ -87,6 +198,7 @@ bool OrderMatching::readerWriterProcess(void) {
 					(*loop)[0], (*loop)[1], (*loop)[2], (*loop)[3], ex.what());
 					e.ex_ptr = std::current_exception();
 					e.thread_name = "ReaderWriter Thread";
+					e.timestamp = std::chrono::system_clock::now();
 					std::lock_guard<std::mutex> gaurd(exceptMutex);
 					allExceptions.push_back(e);
 					success = false;
@@ -96,6 +208,7 @@ bool OrderMatching::readerWriterProcess(void) {
 					(*loop)[0], (*loop)[1], (*loop)[2], (*loop)[3], ex.what());
 					e.ex_ptr = std::current_exception();
 					e.thread_name = "ReaderWriter Thread";
+					e.timestamp = std::chrono::system_clock::now();
 					std::lock_guard<std::mutex> gaurd(exceptMutex);
 					allExceptions.push_back(e);
 					success = false;
@@ -105,6 +218,7 @@ bool OrderMatching::readerWriterProcess(void) {
 					(*loop)[0], (*loop)[1], (*loop)[2], (*loop)[3], ex.what());
 					e.ex_ptr = std::current_exception();
 					e.thread_name = "ReaderWriter Thread";
+					e.timestamp = std::chrono::system_clock::now();
 					std::lock_guard<std::mutex> gaurd(exceptMutex);
 					allExceptions.push_back(e);
 					success = false;
@@ -116,17 +230,23 @@ bool OrderMatching::readerWriterProcess(void) {
 			elogger->error("Can not open file orders.csv {}", ex.what());
 			e.ex_ptr = std::current_exception();
 			e.thread_name = "ReaderWriter Thread";
+			e.timestamp = std::chrono::system_clock::now();
 			std::lock_guard<std::mutex> gaurd(exceptMutex);
 			allExceptions.push_back(e);
 			success = false;
 		}
-		elogger->info("*** Reader Writer Ended ...");
-		dataExausted.test_and_set();
+		
+		auto end_time = std::chrono::high_resolution_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+		elogger->info("*** Reader Writer Ended ... (Execution time: {} μs)", duration);
+		
+		dataExausted = true;
 		orderSyncCond.notify_one();
 	}
 	catch(const exception& ex) {
 		e.ex_ptr = std::current_exception();
 		e.thread_name = "ReaderWriter Thread";
+		e.timestamp = std::chrono::system_clock::now();
 		std::lock_guard<std::mutex> gaurd(exceptMutex);
 		allExceptions.push_back(e);
 		success = false;
@@ -135,18 +255,13 @@ bool OrderMatching::readerWriterProcess(void) {
 }
 
 // this function creates thread(s) and allocates work for thread
-// this is a boss thread func.
-// output : bool - true on success full exit.
- bool OrderMatching::matchingProcess(void){
-
+// this is a leader thread func.
+// output : bool - true on successful exit.
+bool OrderMatching::matchingProcess(void){
 	elogger->info("**** Matching Process Started *****");
 	bool success = true;
-		// pending orders
+		
 	while (true) {
-
-		// There is scope for parallelizing the matching proces.
-		// if multiple processors exists, We can create multi-ple macthers,
-		// for multiple stocks.
 		// Waiting till data get ready
 		std::unique_lock<std::mutex> lk(orderSyncMutex);
 		elogger->info("Matching process waiting for orders ...");
@@ -154,20 +269,25 @@ bool OrderMatching::readerWriterProcess(void) {
 
 		while(nextOrder < orderCount) {
 			try {
-				// elogger->info("Processing {}", orderBook[nextOrder]);
-				bool status = matcher(orderBook[nextOrder]);
+				// Get the order from the high-performance order book
+				Order& order = orderBook->getOrder(nextOrder);
+				
+				// Process the order
+				bool status = matcher(order);
+				
 				if (status) {
-					elogger->info("Success : order {}", orderBook[nextOrder]);
+					elogger->info("Success: order {}", order);
 				}
 				else {
-					elogger->info("Not Success : order {}", orderBook[nextOrder]);
+					elogger->info("Not Success: order {}", order);
 				}
 				nextOrder.fetch_add(1);
-			}			
+			}
 			catch(const exception& ex) {
 				ExceptionRecord e;
 				e.ex_ptr = std::current_exception();
 				e.thread_name = "Matching Thread";
+				e.timestamp = std::chrono::system_clock::now();
 				std::lock_guard<std::mutex> gaurd(exceptMutex);
 				allExceptions.push_back(e);
 				success = false;
@@ -175,92 +295,80 @@ bool OrderMatching::readerWriterProcess(void) {
 		}
 		// this happens at the end-of-the-day 
 		// data exausted
-		if(dataExausted.test_and_set()) break;
+		if(dataExausted) break;
 	}
-	elogger->info("**** Mathing Process Ended *****");
+	elogger->info("**** Matching Process Ended *****");
 	return (success ? true : false);
 }
 
-// This methed macthes orders, and updates status as success on both the sides.
+// This method matches orders, and updates status as success on both the sides.
 // returns true for the given order if it has enough stock on the other side.
 // input  : Order
 // output : bool 
 // multiple worker threads consume this method
-
 bool OrderMatching::matcher(Order& ord) {
-	// Buyer goes to Seller
-	// Seller goes to Buyer
-	// elogger->info("------------------------------------------------------------------");
-	// elogger->info("{} has come to {} stock: {} with qty: {} Order ID: {}", ord.trader, 
-	// ((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"), ord.stock, ord.quantity, ord.orderId);
-	auto& cs_que = ((ord.side == TradeSide::Buy) ? sellMap[ord.stock] : buyMap[ord.stock]);
+	// Use fine-grained locking for stock queues
+	auto& cs_que = ((ord.side == TradeSide::Buy) ? 
+		sellMap.getQueue(ord.stock) : buyMap.getQueue(ord.stock));
 
 	long qty = ord.quantity;
 	if (not cs_que.stockQueue.empty() or cs_que.isLeftOver) {		
 		if (cs_que.isLeftOver) {
 			qty = qty - cs_que.leftOver.quantity;
-			// elogger->info("There is left Over in the previous run. for orderId: {}, qty:{}");
-			// cs_que.leftOver.orderId, cs_que.leftOver.quantity);
 
 			if (qty >= 0) {
-				orderBook[cs_que.leftOver.orderId].status = OrderStatus::Success;
+				orderBook->updateOrderStatus(cs_que.leftOver.orderId, OrderStatus::Success);
 				elogger->info("Success(!!): orderID {} ", cs_que.leftOver.orderId);
 				
 				cs_que.isLeftOver = false;
 
 				if (qty == 0) {
-					orderBook[ord.orderId].status = OrderStatus::Success;
+					orderBook->updateOrderStatus(ord.orderId, OrderStatus::Success);
 					elogger->info("Success($$): orderID {} ", ord.orderId);
 					return true;
 				} 
 			}
 			else {
-				orderBook[ord.orderId].status = OrderStatus::Success;
+				orderBook->updateOrderStatus(ord.orderId, OrderStatus::Success);
 				elogger->info("Success(##): orderID {} ", ord.orderId);
 				cs_que.leftOver.quantity = qty * (-1); // making it +ve, i.e, abs()
 				cs_que.isLeftOver = true;
-				// elogger->info("Left Over: {}", cs_que.leftOver);
-				// orderId remains same
 				return true;
 			}
 		} 
 		else { 
-			// elogger->info("Tere is no leftOver, in the previous run.");
 			QuantityTrader stock_in_que;
 			while(qty > 0) {
 				if(cs_que.stockQueue.pop(stock_in_que)){
-					//elogger->info("qty : {}, Popped stock : {}", qty, stock_in_que);
 					qty = qty - stock_in_que.quantity;
 					if (qty >= 0) {
-						orderBook[stock_in_que.orderId].status = OrderStatus::Success;
+						orderBook->updateOrderStatus(stock_in_que.orderId, OrderStatus::Success);
 						elogger->info("Success(!): orderID {} ", stock_in_que.orderId);
 						
 						cs_que.isLeftOver = false;
 						if (qty == 0) {
-							orderBook[ord.orderId].status = OrderStatus::Success;
+							orderBook->updateOrderStatus(ord.orderId, OrderStatus::Success);
 							elogger->info("Success($): orderID {} ", ord.orderId);
 							return true;
 						} 
 					}
 					else {
-						orderBook[ord.orderId].status = OrderStatus::Success;
+						orderBook->updateOrderStatus(ord.orderId, OrderStatus::Success);
 						elogger->info("Success(#): orderID {} ", ord.orderId);
 						cs_que.leftOver.quantity = qty * (-1); // making it +ve, i.e, abs()
 						cs_que.leftOver.orderId = stock_in_que.orderId;
 						cs_que.isLeftOver = true;
-						// orderId remains same
 						return true;
 					}
 				}
 				else {
-					auto& _que = ((ord.side == TradeSide::Buy) ?  buyMap[ord.stock] : sellMap[ord.stock]);
+					// Use fine-grained locking for the other queue map
+					auto& _que = ((ord.side == TradeSide::Buy) ?  
+						buyMap.getQueue(ord.stock) : sellMap.getQueue(ord.stock));
+						
 					// order quantity still remains, store it in map
 					QuantityTrader qt(qty, ord.orderId);
 					_que.stockQueue.push(qt);
-					// elogger->info("Stock que empty, on {} side for stock {} for {}er, adding qty:{} to {}er queue orderID {}", 
-					// ((ord.side == TradeSide::Sell) ? "\'Buy\'" : "\'Sell\'"), ord.stock,
-					// ((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"), qty,
-					// ((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"), ord.orderId);
 					return false;
 				}
 			}
@@ -269,48 +377,55 @@ bool OrderMatching::matcher(Order& ord) {
 	else {
 		// if stock is first time arrived into trading, create an entry for it
 		QuantityTrader qt(ord.quantity, ord.orderId);
-		auto& _que = ((ord.side == TradeSide::Buy) ? buyMap[ord.stock] : sellMap[ord.stock]);
+		// Use fine-grained locking for the queue map
+		auto& _que = ((ord.side == TradeSide::Buy) ? 
+			buyMap.getQueue(ord.stock) : sellMap.getQueue(ord.stock));
 		_que.stockQueue.push(qt);
-		// elogger->info("No {}er is available for stock: {}, so adding qty: {} to {}er queue.", 
-		// ((ord.side == TradeSide::Sell) ? "\'Buy\'" : "\'Sell\'"), ord.stock, qt,
-		// ((ord.side == TradeSide::Buy) ? "\'Buy\'" : "\'Sell\'"));
 	}	
 	return false;
 }
 
-// Spawns mathingProcess thread and readerWriter thread initially
-// Boss thread
+// Function to process orders for a specific stock
+void OrderMatching::processStockOrders(const std::string& stock) {
+    // Get all orders for this stock from the high-performance order book
+    auto orders = orderBook->getOrdersByStock(stock);
+    
+    for (auto& orderRef : orders) {
+        Order& order = orderRef.get();
+        // Process each order
+        matcher(order);
+    }
+}
+
+// Spawns matchingProcess thread and readerWriter thread initially
+// Leader thread
 bool OrderMatching::orderProcess(void) {
-    orderBook.clear();
-	// hou much concurrency needed ?
-	// no of logical threads = no of cores available, for maximum through put
-    // elogger->info("Hardware Concurrency = {}", std::thread::hardware_concurrency());
-	std::thread readerWriterThread(readerWriterProcess);
-	clogger->info("data reader thread(Producer) started ...");
+    auto start = std::chrono::high_resolution_clock::now();
+    elogger->info("**** Order Processing Started *****");
 
-    auto start = std::chrono::system_clock::now();
-	std::thread mathingEngineBoss(matchingProcess);
-	clogger->info("matchingEngine thread(Consumer) started ...");
+    // Group orders by stock
+    std::unordered_map<std::string, std::vector<std::future<void>>> futures;
 
-    readerWriterThread.join();
-	clogger->info("readerWriter thread joined ...");
+    // Extract unique stocks from the order book
+    std::unordered_set<std::string> stocks;
+    orderBook->forEachOrder([&stocks](const Order& order) {
+        stocks.insert(order.stock);
+    });
 
-	mathingEngineBoss.join();
-	clogger->info("matchingEngine thread joined ...");  
+    // Create tasks for each stock
+    for (const auto& stock : stocks) {
+        futures[stock].push_back(threadPool->submitTask(stock));
+    }
 
-	auto end = std::chrono::system_clock::now();
-	std::chrono::duration<double> diff = end-start;
-	clogger->info("Time taken to process {} orders : {} secs", orderCount, diff.count());
+    // Wait for all tasks to complete
+    for (auto& [stock, futureVec] : futures) {
+        for (auto& future : futureVec) {
+            future.wait();
+        }
+    }
 
-	// pending exceptions from threads, if any
-	for(const auto& ex: allExceptions) {
-	    try {
-			if (ex.ex_ptr) {
-				std::rethrow_exception(ex.ex_ptr);
-			}
-		} catch(const std::exception& e) {
-			elogger->error("Exception : {}, thread name : {}", ex.thread_name, e.what());
-		}
-	}
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::microseconds>(end - start).count();
+    elogger->info("**** Order Processing Ended ***** (Execution time: {} μs)", duration);
     return true;
 }

@@ -1,8 +1,11 @@
 #ifndef __LOGGER_HPP__
 #define __LOGGER_HPP__
 
+#define SPDLOG_FMT_EXTERNAL 0
+
 #include <memory>
 #include <iostream>
+#include <mutex>
 
 #include "spdlog/spdlog.h"
 #include "spdlog/logger.h"
@@ -20,6 +23,7 @@ class Logger {
         ~Logger(){} // cannot be inherited
         static shared_ptr<logger> _logger;
         static shared_ptr<logger> _asyncLogger;
+        static std::mutex _mutex; // Added mutex declaration
 };
 
 #endif

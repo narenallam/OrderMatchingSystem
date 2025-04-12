@@ -1,0 +1,18 @@
+[requires]
+boost/1.79.0
+fmt/8.1.1
+spdlog/1.10.0
+
+[generators]
+cmake_find_package
+cmake_paths
+
+[options]
+boost:shared=False
+fmt:shared=False
+spdlog:shared=False
+
+[imports]
+bin, *.dll -> ./bin
+lib, *.dylib* -> ./lib
+lib, *.so* -> ./lib

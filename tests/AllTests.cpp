@@ -75,6 +75,158 @@ BOOST_AUTO_TEST_CASE(test_order2) {
 
   tlogger->info("Passed: test_order2");
 }
+
+BOOST_AUTO_TEST_CASE(test_order3) {
+    OrderMatching om;
+    orderBook.clear();
+    std::ofstream myfile;
+    auto tlogger = Logger::getLogger();
+    nextOrder = 0;
+    orderCount = 0;
+
+    myfile.open("orders.csv");
+    myfile << "Trader_2,Stock_X,500,Buy\n";
+    myfile << "Trader_3,Stock_X,700,Buy\n";
+    myfile << "Trader_5,Stock_X,1000,Sell\n";
+    myfile << "Trader_5,Stock_X,200,Sell\n";
+    myfile << "Trader_1,Stock_Y,1000,Buy\n";
+    myfile << "Trader_4,Stock_Y,1100,Sell\n";
+    myfile << "Trader_2,Stock_Y,100,Buy\n";
+    myfile << "Trader_5,Stock_Z,1000,Sell\n";
+    myfile << "Trader_2,Stock_Z,200,Buy\n";
+    myfile << "Trader_4,Stock_Z,800,Buy\n";
+    myfile.close();
+
+    OrderMatching::readerWriterProcess();
+
+    BOOST_CHECK(OrderMatching::matcher(orderBook[0]) == false);
+    BOOST_CHECK(OrderMatching::matcher(orderBook[1]) == false);
+    BOOST_CHECK(OrderMatching::matcher(orderBook[2]) == true);
+    BOOST_CHECK(orderBook[0].status == OrderStatus::Success);
+    BOOST_CHECK(orderBook[2].status == OrderStatus::Success);
+    BOOST_CHECK(OrderMatching::matcher(orderBook[3]) == true);
+    BOOST_CHECK(orderBook[1].status == OrderStatus::Success);
+    BOOST_CHECK(OrderMatching::matcher(orderBook[4]) == true);
+    BOOST_CHECK(orderBook[4].status == OrderStatus::Success);
+    tlogger->info("Passed: test_order3");
+}
+
+// Add more test cases for edge scenarios
+BOOST_AUTO_TEST_CASE(test_large_order) {
+    OrderMatching om;
+    orderBook.clear();
+    std::ofstream myfile;
+    auto tlogger = Logger::getLogger();
+    nextOrder = 0;
+    orderCount = 0;
+
+    myfile.open("orders.csv");
+    for (int i = 0; i < 1000; ++i) {
+        myfile << "Trader_" << i << ",Stock_A," << (i + 1) * 10 << ",Buy\n";
+    }
+    for (int i = 0; i < 1000; ++i) {
+        myfile << "Trader_" << (i + 1000) << ",Stock_A," << (i + 1) * 10 << ",Sell\n";
+    }
+    myfile.close();
+
+    OrderMatching::readerWriterProcess();
+
+    for (int i = 0; i < 1000; ++i) {
+        BOOST_CHECK(OrderMatching::matcher(orderBook[i]) == true);
+        BOOST_CHECK(orderBook[i].status == OrderStatus::Success);
+    }
+    tlogger->info("Passed: test_large_order");
+}
+
+BOOST_AUTO_TEST_CASE(test_invalid_data) {
+    OrderMatching om;
+    orderBook.clear();
+    std::ofstream myfile;
+    auto tlogger = Logger::getLogger();
+    nextOrder = 0;
+    orderCount = 0;
+
+    myfile.open("orders.csv");
+    myfile << "Trader_1,Stock_X,abc,Buy\n"; // Invalid quantity
+    myfile << "Trader_2,Stock_X,500,InvalidSide\n"; // Invalid side
+    myfile.close();
+
+    bool success = OrderMatching::readerWriterProcess();
+    BOOST_CHECK(success == false);
+    tlogger->info("Passed: test_invalid_data");
+}
+
+BOOST_AUTO_TEST_CASE(test_no_orders) {
+    OrderMatching om;
+    orderBook.clear();
+    std::ofstream myfile;
+    auto tlogger = Logger::getLogger();
+    nextOrder = 0;
+    orderCount = 0;
+
+    myfile.open("orders.csv");
+    myfile.close();
+
+    bool success = OrderMatching::readerWriterProcess();
+    BOOST_CHECK(success == true);
+    BOOST_CHECK(orderBook.empty());
+    tlogger->info("Passed: test_no_orders");
+}
+
+BOOST_AUTO_TEST_CASE(test_partial_match) {
+    OrderMatching om;
+    orderBook.clear();
+    std::ofstream myfile;
+    auto tlogger = Logger::getLogger();
+    nextOrder = 0;
+    orderCount = 0;
+
+    myfile.open("orders.csv");
+    myfile << "Trader_1,Stock_X,500,Buy\n";
+    myfile << "Trader_2,Stock_X,300,Sell\n";
+    myfile << "Trader_3,Stock_X,200,Sell\n";
+    myfile.close();
+
+    OrderMatching::readerWriterProcess();
+
+    BOOST_CHECK(OrderMatching::matcher(orderBook[0]) == true);
+    BOOST_CHECK(orderBook[0].status == OrderStatus::Success);
+    BOOST_CHECK(orderBook[1].status == OrderStatus::Success);
+    BOOST_CHECK(orderBook[2].status == OrderStatus::Success);
+    tlogger->info("Passed: test_partial_match");
+}
+
+BOOST_AUTO_TEST_CASE(test_multiple_stocks) {
+    OrderMatching om;
+    orderBook.clear();
+    std::ofstream myfile;
+    auto tlogger = Logger::getLogger();
+    nextOrder = 0;
+    orderCount = 0;
+
+    myfile.open("orders.csv");
+    myfile << "Trader_1,Stock_X,500,Buy\n";
+    myfile << "Trader_2,Stock_Y,300,Sell\n";
+    myfile << "Trader_3,Stock_Z,200,Buy\n";
+    myfile << "Trader_4,Stock_X,500,Sell\n";
+    myfile << "Trader_5,Stock_Y,300,Buy\n";
+    myfile << "Trader_6,Stock_Z,200,Sell\n";
+    myfile.close();
+
+    OrderMatching::readerWriterProcess();
+
+    BOOST_CHECK(OrderMatching::matcher(orderBook[0]) == true);
+    BOOST_CHECK(orderBook[0].status == OrderStatus::Success);
+    BOOST_CHECK(orderBook[3].status == OrderStatus::Success);
+    BOOST_CHECK(OrderMatching::matcher(orderBook[1]) == true);
+    BOOST_CHECK(orderBook[1].status == OrderStatus::Success);
+    BOOST_CHECK(orderBook[4].status == OrderStatus::Success);
+    BOOST_CHECK(OrderMatching::matcher(orderBook[2]) == true);
+    BOOST_CHECK(orderBook[2].status == OrderStatus::Success);
+    BOOST_CHECK(orderBook[5].status == OrderStatus::Success);
+    tlogger->info("Passed: test_multiple_stocks");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(TestLogger)
